@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include<stdlib.h>
+#include <stdlib.h>
 
 #define MAX_PACKET_SIZE 1024
 #define PORT 1337
@@ -12,6 +12,7 @@ struct sockaddr_in ownAddr;
 int sockfd;
 
 int init(){
+    
     if((sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
     	printf("sock\n");
         exit(1);
@@ -33,7 +34,7 @@ int init(){
 int recv_data(int* src, char* data){
     struct sockaddr_in clientAddr;
     int clientLen, recv_len;
-
+    
     recv_len = -1;
 
     clientLen = sizeof(clientAddr);
