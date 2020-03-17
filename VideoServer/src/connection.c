@@ -6,9 +6,6 @@
 #include <stdlib.h>
 #include "connection.h"
 
-
-
-
 struct sockaddr_in ownAddr;
 int sockfd;
 
@@ -52,4 +49,8 @@ int recv_data(struct sockaddr_in* src, char* data){
 
 int send_data(struct sockaddr_in dest, char* data, int len){
     sendto(sockfd, data, len, 0, (struct sockaddr *) &dest, sizeof(dest));
+}
+
+int addrMatch(struct sockaddr_in addr1, struct sockaddr_in addr2){
+    return (addr1.sin_addr.s_addr == addr2.sin_addr.s_addr) && (addr1.sin_port == addr2.sin_port);
 }

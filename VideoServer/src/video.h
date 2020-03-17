@@ -4,4 +4,5 @@
 void wait_init(struct sockaddr_in* addr);
 void recv_video();
 
+
 #endif // VIDEO_H

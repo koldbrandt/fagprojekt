@@ -9,6 +9,7 @@
 
 #define INIT_BYTE 48
 #define TERMINATE_BYTE 0
+#define VIDEO_BUFFER_SIZE (MAX_PACKET_SIZE * 5)
 
 int connectionStatus;
 struct sockaddr_in clientAddr;
@@ -53,12 +54,25 @@ void wait_init(struct sockaddr_in* client){
 void recv_video(){
     struct sockaddr_in recvAddr;
     char data[MAX_PACKET_SIZE];
+    char videoBuffer[VIDEO_BUFFER_SIZE]; 
+    int dataLen = 0;
+    int fifoStatus = 0;
 
     while(1){
-        recv_data(&recvAddr, data);
-        if((recvAddr.sin_addr.s_addr == clientAddr.sin_addr.s_addr) && (recvAddr.sin_port == clientAddr.sin_port)){
-            
+        dataLen = recv_data(&recvAddr, data);
+        if(dataLen <= 0){
+            continue;
+        }
+
+        if(addrMatch(recvAddr, clientAddr)){
+            //fifoStatus = send_data_fifo(data, dataLen);
+        }
+        else{
+            char response = TERMINATE_BYTE;
+            send_data(recvAddr, &response, 1);
         }
     }
 }
+
+
 
