@@ -9,7 +9,7 @@
 struct sockaddr_in ownAddr;
 int sockfd;
 
-int init_socket(){
+int init_server_socket(){
     
     if((sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
     	printf("sock\n");
@@ -29,28 +29,41 @@ int init_socket(){
     return 0;
 }
 
-int recv_data(struct sockaddr_in* src, char* data){
-    int clientLen, recv_len;
-    struct sockaddr_in cAddr;
-    
-    recv_len = -1;
-
-    clientLen = sizeof(cAddr);
-
-    if ((recv_len = recvfrom(sockfd, data, MAX_PACKET_SIZE, 0, (struct sockaddr *) &cAddr, &clientLen)) == -1)
-    {
+int init_client_socket(struct sockaddr_in* serverAddr){
+    if((sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
+    	printf("sock\n");
         exit(1);
     }
 
-    *src = cAddr;
+    memset(serverAddr, 0, sizeof(*serverAddr)); 
+    serverAddr->sin_family = AF_INET; 
+    serverAddr->sin_addr.s_addr = inet_addr("127.0.0.1"); 
+    serverAddr->sin_port = htons(SERVER_PORT);
+}
+
+int recv_data(struct sockaddr_in* src, char* data){
+    int clientLen, recv_len;
+    
+    recv_len = -1;
+
+    clientLen = sizeof(*src);
+
+    if ((recv_len = recvfrom(sockfd, data, MAX_PACKET_SIZE, 0, (struct sockaddr *) src, &clientLen)) == -1)
+    {
+        exit(1);
+    }
 
     return recv_len;
 }
 
 int send_data(struct sockaddr_in* dest, char* data, int len){
-    sendto(sockfd, data, len, 0, (struct sockaddr *) &dest, sizeof(dest));
+    sendto(sockfd, data, len, 0, (struct sockaddr *) dest, sizeof(*dest));
 }
 
 int addrMatch(struct sockaddr_in* addr1, struct sockaddr_in* addr2){
     return (addr1->sin_addr.s_addr == addr2->sin_addr.s_addr) && (addr1->sin_port == addr2->sin_port);
+}
+
+int close_connection(){
+    close(sockfd);
 }
