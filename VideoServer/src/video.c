@@ -6,9 +6,8 @@
 #include <stdlib.h>
 #include "connection.h"
 #include "video.h"
+#include "fifo.h"
 
-#define INIT_BYTE 48
-#define TERMINATE_BYTE 0
 #define VIDEO_BUFFER_SIZE (MAX_PACKET_SIZE * 5)
 
 int connectionStatus;
@@ -17,6 +16,15 @@ struct sockaddr_in clientAddr;
 enum connection_status{
     WAITING_INIT,
     RECV_VIDEO
+};
+
+enum packet_types{
+    INIT = 1,
+    ACK_INIT = 2,
+    TERMINATE = 3,
+    VIDEO_DATA = 4,
+    SEND_SLOW = 5,
+    SEND_FAST = 6
 };
 
 int main(){
@@ -42,9 +50,8 @@ void wait_init(struct sockaddr_in* client){
     
     while(connectionStatus == WAITING_INIT){
         recv_data(client, data);
-        if(data[0] == INIT_BYTE){
-            char response = INIT_BYTE;
-            send_data(clientAddr, &response, 1);
+        if(data[0] == INIT){
+            send_packet_type(client, ACK_INIT);
             connectionStatus = RECV_VIDEO;
             printf("init done\n");
         }
@@ -54,24 +61,43 @@ void wait_init(struct sockaddr_in* client){
 void recv_video(){
     struct sockaddr_in recvAddr;
     char data[MAX_PACKET_SIZE];
-    char videoBuffer[VIDEO_BUFFER_SIZE]; 
     int dataLen = 0;
+    int recvLen = 0;
     int fifoStatus = 0;
 
     while(1){
-        dataLen = recv_data(&recvAddr, data);
-        if(dataLen <= 0){
+        recvLen = recv_data(&recvAddr, data);
+        if(recvLen < 3){
             continue;
         }
 
-        if(addrMatch(recvAddr, clientAddr)){
-            //fifoStatus = send_data_fifo(data, dataLen);
+        int type = data[0];
+        short len = 0;
+        memcpy(&data[1], &dataLen, 2);
+        int dataLen = (int) len;
+
+        if(dataLen <= 0 || (type != VIDEO_DATA && type != TERMINATE)){
+            continue;
+        }
+        
+        if(addrMatch(&recvAddr, &clientAddr)){
+            fifoStatus = send_data_fifo(&data[2], dataLen);
+            if(fifoStatus == FIFO_FULL){
+                send_packet_type(&clientAddr, SEND_SLOW);
+            }
+            else if(fifoStatus == FIFO_EMPTY){
+                send_packet_type(&clientAddr, SEND_FAST);
+            }
         }
         else{
-            char response = TERMINATE_BYTE;
-            send_data(recvAddr, &response, 1);
+            send_packet_type(&clientAddr, TERMINATE);
         }
     }
+}
+
+void send_packet_type(struct sockaddr_in* client, char type){
+    char response = type;
+    send_data(client, &response, 1);
 }
 
 

@@ -6,7 +6,7 @@
 
 int init_socket();
 int recv_data(struct sockaddr_in* src, char* data);
-int send_data(struct sockaddr_in dest, char* data, int len);
-int addrMatch(struct sockaddr_in addr1, struct sockaddr_in addr2);
+int send_data(struct sockaddr_in* dest, char* data, int len);
+int addrMatch(struct sockaddr_in* addr1, struct sockaddr_in* addr2);
 
 #endif // CONNECTION_H
