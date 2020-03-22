@@ -28,6 +28,11 @@ enum packet_types{
 };
 
 int main(int argc, char *argv[]){
+    if(argc == 1 || strcmp(argv[1],"-h") == 0){
+        print_help();
+        exit(0);
+    }
+
     int serverPort = SERVER_PORT;
     char* serverIP = SERVER_IP;
     for(int i = 0; i < argc; i++){
@@ -44,18 +49,7 @@ int main(int argc, char *argv[]){
     else if(strcmp(argv[1],"-c") == 0){
         run_client(serverIP, serverPort);
     }
-    else if(strcmp(argv[1],"-h") == 0){
-        
-        printf("Server syntax\n");
-        printf("./main.out -s -p PORT\n");
-        printf("Example server:\n");
-        printf("./main.out -s -p 1234\n");
-        printf("\n");
-        printf("Client syntax\n");
-        printf("./main.out -c -ip IP -p PORT\n");
-        printf("Example client:\n");
-        printf("./main.out -c -ip 127.0.0.1 -p 1234\n");
-    }
+    
 }
 
 void run_server(int serverPort){
@@ -174,4 +168,16 @@ void recv_video(){
 void send_packet_type(struct sockaddr_in* dest, char type){
     char response = type;
     send_data(dest, &response, 1);
+}
+
+void print_help(){
+    printf("Server syntax\n");
+    printf("./main.out -s -p PORT\n");
+    printf("Example server:\n");
+    printf("./main.out -s -p 1234\n");
+    printf("\n");
+    printf("Client syntax\n");
+    printf("./main.out -c -ip IP -p PORT\n");
+    printf("Example client:\n");
+    printf("./main.out -c -ip 127.0.0.1 -p 1234\n");
 }
