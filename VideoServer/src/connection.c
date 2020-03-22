@@ -9,7 +9,7 @@
 struct sockaddr_in ownAddr;
 int sockfd;
 
-int init_server_socket(){
+int init_server_socket(int port){
     
     if((sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
     	printf("sock\n");
@@ -19,7 +19,7 @@ int init_server_socket(){
     memset((char *) &ownAddr, 0, sizeof(ownAddr));
     ownAddr.sin_family = AF_INET;
     ownAddr.sin_addr.s_addr = INADDR_ANY;
-    ownAddr.sin_port = htons(SERVER_PORT);
+    ownAddr.sin_port = htons(port);
 
     if(bind(sockfd, (struct sockaddr*) &ownAddr, sizeof(ownAddr)) < 0)
     {
@@ -29,7 +29,7 @@ int init_server_socket(){
     return 0;
 }
 
-int init_client_socket(struct sockaddr_in* serverAddr){
+int init_client_socket(struct sockaddr_in* serverAddr, char* serverIP, int port){
     if((sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
     	printf("sock\n");
         exit(1);
@@ -37,8 +37,8 @@ int init_client_socket(struct sockaddr_in* serverAddr){
 
     memset(serverAddr, 0, sizeof(*serverAddr)); 
     serverAddr->sin_family = AF_INET; 
-    serverAddr->sin_addr.s_addr = inet_addr("127.0.0.1"); 
-    serverAddr->sin_port = htons(SERVER_PORT);
+    serverAddr->sin_addr.s_addr = inet_addr(serverIP); 
+    serverAddr->sin_port = htons(port);
 }
 
 int recv_data(struct sockaddr_in* src, char* data){
