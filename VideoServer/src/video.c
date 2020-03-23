@@ -8,6 +8,8 @@
 #include "video.h"
 #include "fifo.h"
 
+
+
 #define DUMMY_DATA_LEN 1000
 
 int connectionStatus;
@@ -28,35 +30,24 @@ enum packet_types{
 };
 
 int main(int argc, char *argv[]){
-    if(argc == 1 || strcmp(argv[1],"-h") == 0){
-        print_help();
-        exit(0);
-    }
-
-    int serverPort = SERVER_PORT;
-    char* serverIP = SERVER_IP;
-    for(int i = 0; i < argc; i++){
-        if(strcmp(argv[i],"-p") == 0){
-            serverPort = atoi(argv[i + 1]);
-        }
-        if(strcmp(argv[i],"-ip") == 0){
-            serverIP = argv[i + 1];
-        }
-    }
     if(strcmp(argv[1],"-s") == 0){
-        run_server(serverPort);
+        run_server();
     }
     else if(strcmp(argv[1],"-c") == 0){
-        run_client(serverIP, serverPort);
+        run_client();
     }
-    
 }
 
-void run_server(int serverPort){
-    init_server_socket(serverPort);
-    printf("Starting in server mode on port %d\n", serverPort);
+void run_server(){
+    init_server_socket();
+    printf("Starting in server mode\n");
     connectionStatus = WAITING_INIT;
-
+	
+	//Open physical memory 
+	open_physical_memory_device();
+    mmap_fpga_peripherals();
+	
+	
     while(1){
         switch(connectionStatus){
             case WAITING_INIT:
@@ -68,16 +59,20 @@ void run_server(int serverPort){
                 break;
         }
     }
+	
+	//close physical memory
+	munmap_fpga_peripherals();
+    close_physical_memory_device();
+	
 }
 
-void run_client(char* serverIP, int serverPort){
+void run_client(){
 
     struct sockaddr_in serverAddr;
-    init_client_socket(&serverAddr, serverIP, serverPort);
+    init_client_socket(&serverAddr);
     int choice = 0;
     printf("Starting in client mode\n");
-    printf("Connecting to %s on port %d\n", serverIP, serverPort);
-    printf("Enter \n1 to send INIT \n2 to send VIDEO_DATA \n3 to send TERMINATE\n");
+    printf("enter \n1 to send INIT \n2 to send VIDEO_DATA \n3 to send TERMINATE\n");
     while(1){
         scanf("%d", &choice);
 
@@ -150,8 +145,9 @@ void recv_video(){
         }
 
         if(addrMatch(&recvAddr, &clientAddr)){
-            printf("received VIDEO_DATA\n");
+            printf("received VIDEO_DATAA\n");
             fifoStatus = send_data_fifo(&data[2], dataLen);
+			printf("kusse");
             if(fifoStatus == FIFO_FULL){
                 send_packet_type(&clientAddr, SEND_SLOW);
             }
@@ -168,16 +164,4 @@ void recv_video(){
 void send_packet_type(struct sockaddr_in* dest, char type){
     char response = type;
     send_data(dest, &response, 1);
-}
-
-void print_help(){
-    printf("Server syntax\n");
-    printf("./main.out -s -p PORT\n");
-    printf("Example server:\n");
-    printf("./main.out -s -p 1234\n");
-    printf("\n");
-    printf("Client syntax\n");
-    printf("./main.out -c -ip IP -p PORT\n");
-    printf("Example client:\n");
-    printf("./main.out -c -ip 127.0.0.1 -p 1234\n");
 }
