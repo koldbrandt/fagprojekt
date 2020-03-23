@@ -53,12 +53,9 @@ volatile uint32_t *hps_to_fpga_fifo_status = NULL;
 void *fpga_to_hps_fifo = NULL;
 volatile uint32_t *fpga_to_hps_fifo_status = NULL;
 
-void open_physical_memory_device();
-void close_physical_memory_device();
+
 void mmap_hps_peripherals();
 void munmap_hps_peripherals();
-void mmap_fpga_peripherals();
-void munmap_fpga_peripherals();
 void mmap_peripherals();
 void munmap_peripherals();
 void setup_hps_gpio();

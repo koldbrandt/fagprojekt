@@ -29,18 +29,35 @@ enum packet_types{
     SEND_FAST = 6
 };
 
+
 int main(int argc, char *argv[]){
+    if(argc == 1 || strcmp(argv[1],"-h") == 0){
+        print_help();
+        exit(0);
+    }
+
+    int serverPort = SERVER_PORT;
+    char* serverIP = SERVER_IP;
+    for(int i = 0; i < argc; i++){
+        if(strcmp(argv[i],"-p") == 0){
+            serverPort = atoi(argv[i + 1]);
+        }
+        if(strcmp(argv[i],"-ip") == 0){
+            serverIP = argv[i + 1];
+        }
+    }
     if(strcmp(argv[1],"-s") == 0){
-        run_server();
+        run_server(serverPort);
     }
     else if(strcmp(argv[1],"-c") == 0){
-        run_client();
+        run_client(serverIP, serverPort);
     }
 }
 
-void run_server(){
-    init_server_socket();
-    printf("Starting in server mode\n");
+
+void run_server(int serverPort){
+    init_server_socket(serverPort);
+    printf("Starting in server mode on port %d\n", serverPort);
     connectionStatus = WAITING_INIT;
 	
 	//Open physical memory 
@@ -66,12 +83,13 @@ void run_server(){
 	
 }
 
-void run_client(){
+void run_client(char* serverIP, int serverPort){
 
     struct sockaddr_in serverAddr;
-    init_client_socket(&serverAddr);
+    init_client_socket(&serverAddr, serverIP, serverPort);
     int choice = 0;
     printf("Starting in client mode\n");
+    printf("Connecting to %s on port %d\n", serverIP, serverPort);
     printf("enter \n1 to send INIT \n2 to send VIDEO_DATA \n3 to send TERMINATE\n");
     while(1){
         scanf("%d", &choice);
@@ -145,9 +163,7 @@ void recv_video(){
         }
 
         if(addrMatch(&recvAddr, &clientAddr)){
-            printf("received VIDEO_DATAA\n");
             fifoStatus = send_data_fifo(&data[2], dataLen);
-			printf("kusse");
             if(fifoStatus == FIFO_FULL){
                 send_packet_type(&clientAddr, SEND_SLOW);
             }
@@ -164,4 +180,16 @@ void recv_video(){
 void send_packet_type(struct sockaddr_in* dest, char type){
     char response = type;
     send_data(dest, &response, 1);
+}
+
+void print_help(){
+    printf("Server syntax\n");
+    printf("./main.out -s -p PORT\n");
+    printf("Example server:\n");
+    printf("./main.out -s -p 1234\n");
+    printf("\n");
+    printf("Client syntax\n");
+    printf("./main.out -c -ip IP -p PORT\n");
+    printf("Example client:\n");
+    printf("./main.out -c -ip 127.0.0.1 -p 1234\n");
 }

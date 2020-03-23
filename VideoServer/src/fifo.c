@@ -89,10 +89,8 @@ void munmap_fpga_peripherals() {
 
 }
 
-
 int send_data_fifo(char* data, int dataLen){
 
-	printf("penis");
     if (!FIFO_FRAMING_FULL) {
 		*fifo_framing_transmit_ptr=(int)data;
 		printf("FIFO to framing block Empty value %d \n", FIFO_FRAMING_EMPTY);
@@ -103,6 +101,4 @@ int send_data_fifo(char* data, int dataLen){
 		return 1;
 	}
 	return 0;
-	
-	
 }
