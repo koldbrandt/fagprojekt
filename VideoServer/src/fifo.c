@@ -8,6 +8,7 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <unistd.h>
+#include "buffer.h"
 
 
 #include "hps_soc_system.h"
@@ -89,10 +90,23 @@ void munmap_fpga_peripherals() {
 
 }
 
-int send_data_fifo(char* data, int dataLen){
+void* fifo_write_thread(void* buffer){
+    char tempRead[1];
+    cbuf_handle_t video_buffer = (cbuf_handle_t) buffer;
+    int data;
+    while(1){
+        if(!buffer_is_empty(video_buffer)){
+            read_data_buffer(tempRead, 1, video_buffer);
+            printf("read: %c\n", tempRead[0]);
+        }
+        sleep(2);
+    }
+}
+
+int send_data_fifo(int data){
 
     if (!FIFO_FRAMING_FULL) {
-		*fifo_framing_transmit_ptr=(int)data;
+		*fifo_framing_transmit_ptr = data;
 		printf("FIFO to framing block Empty value %d \n", FIFO_FRAMING_EMPTY);
 		printf("FIFO to framing block Full value %d \n", FIFO_FRAMING_FULL);
 		printf("FIFO to framing block fill level %d \n", *fifo_framing_status_ptr);

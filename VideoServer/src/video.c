@@ -4,13 +4,13 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <pthread.h>
 #include "connection.h"
 #include "video.h"
 #include "fifo.h"
+#include "buffer.h"
 
-
-
-#define DUMMY_DATA_LEN 1000
+#define DUMMY_DATA_LEN 14
 
 int connectionStatus;
 struct sockaddr_in clientAddr;
@@ -30,6 +30,8 @@ enum packet_types{
 };
 
 
+pthread_t fifoWriteThreadId;
+
 int main(int argc, char *argv[]){
     if(argc == 1 || strcmp(argv[1],"-h") == 0){
         print_help();
@@ -47,15 +49,17 @@ int main(int argc, char *argv[]){
         }
     }
     if(strcmp(argv[1],"-s") == 0){
-        run_server(serverPort);
+        cbuf_handle_t video_buffer = init_buffer();
+        pthread_create(&fifoWriteThreadId, NULL, &fifo_write_thread, video_buffer);
+        run_server(serverPort, video_buffer);
     }
     else if(strcmp(argv[1],"-c") == 0){
         run_client(serverIP, serverPort);
     }
+    pthread_join(fifoWriteThreadId, NULL);
 }
 
-
-void run_server(int serverPort){
+void run_server(int serverPort, cbuf_handle_t video_buf){
     init_server_socket(serverPort);
     printf("Starting in server mode on port %d\n", serverPort);
     connectionStatus = WAITING_INIT;
@@ -64,7 +68,6 @@ void run_server(int serverPort){
 	open_physical_memory_device();
     mmap_fpga_peripherals();
 	
-	
     while(1){
         switch(connectionStatus){
             case WAITING_INIT:
@@ -72,7 +75,7 @@ void run_server(int serverPort){
                 break;
             
             case RECV_VIDEO:
-                recv_video();
+                recv_video(video_buf);
                 break;
         }
     }
@@ -103,8 +106,10 @@ void run_client(char* serverIP, int serverPort){
             case 2:;
                 char packet[DUMMY_DATA_LEN];
                 packet[0] = VIDEO_DATA;
-                short len = 500;
+                short len = DUMMY_DATA_LEN - 3;
                 memcpy(&packet[1], &len, 2);
+                sprintf(&packet[3], "0123456789");
+                printf("sent the string \"%s\" to the server as video data\n", "0123456789");
                 send_data(&serverAddr, packet, DUMMY_DATA_LEN);
                 printf("sent VIDEO_DATA\n");
                 break;
@@ -132,12 +137,13 @@ void wait_init(struct sockaddr_in* client){
     }
 }
 
-void recv_video(){
+void recv_video(cbuf_handle_t video_buffer){
     struct sockaddr_in recvAddr;
     char data[MAX_PACKET_SIZE];
     int dataLen = 0;
     int recvLen = 0;
     int fifoStatus = 0;
+    
 
     while(1){
         recvLen = recv_data(&recvAddr, data);
@@ -161,15 +167,16 @@ void recv_video(){
         if(dataLen <= 0 || type != VIDEO_DATA){
             continue;
         }
+        
 
         if(addrMatch(&recvAddr, &clientAddr)){
-            fifoStatus = send_data_fifo(&data[2], dataLen);
-            if(fifoStatus == FIFO_FULL){
+            send_data_buffer(&data[3], dataLen, video_buffer);
+            /*if(fifoStatus == BUFFER_FULL){
                 send_packet_type(&clientAddr, SEND_SLOW);
             }
-            else if(fifoStatus == FIFO_EMPTY){
+            else if(fifoStatus == BUFFER_EMPTY){
                 send_packet_type(&clientAddr, SEND_FAST);
-            }
+            }*/
         }
         else{
             send_packet_type(&clientAddr, TERMINATE);

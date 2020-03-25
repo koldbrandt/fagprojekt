@@ -8,10 +8,11 @@ SRC=$(wildcard $(SRC_DIR)/*.c)
 
 # Build flags to use
 CFLAGS=-I$(SRC_DIR)
+LDFLAGS=-lpthread
 
 # Path where compiled files should be build to
 BUILD_DIR=build
 
 #
 main:$(SRC)
-	$(CC) $(CFLAGS) -o $(BUILD_DIR)/main.out $^
+	$(CC) $(CFLAGS) -o $(BUILD_DIR)/main.out $^ $(LDFLAGS)
