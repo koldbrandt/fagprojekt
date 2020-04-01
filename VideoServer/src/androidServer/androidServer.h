@@ -1,6 +1,6 @@
 #ifndef ANDROIDSERVER_H
 #define ANDROIDSERVER_H
 
-void clientConnected(int sockfd);
+void func(int sockfd);
 
 #endif
