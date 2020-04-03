@@ -98,12 +98,14 @@ void* fifo_write_thread(void* buffer){
         if(!buffer_is_empty(video_buffer)){
             read_data_buffer(tempRead, 1, video_buffer);
             printf("read: %c\n", tempRead[0]);
+            send_data_fifo(tempRead[0]);
         }
-        sleep(2);
+        usleep(200000); //should use nanosleep but i cba
+        //sleeping is needed to not use 100% cpu
     }
 }
 
-int send_data_fifo(int data){
+int send_data_fifo(char data){
 
     if (!FIFO_FRAMING_FULL) {
 		*fifo_framing_transmit_ptr = data;

@@ -1,7 +1,7 @@
 #ifndef BUFFER_H
 #define BUFFER_H
 
-#define VIDEO_BUFFER_SIZE 200
+#define VIDEO_BUFFER_SIZE 20
 
 enum buffer_status{
     BUFFER_FULL,

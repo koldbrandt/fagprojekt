@@ -29,7 +29,6 @@ enum packet_types{
     SEND_FAST = 6
 };
 
-
 pthread_t fifoWriteThreadId;
 
 int main(int argc, char *argv[]){
@@ -83,7 +82,6 @@ void run_server(int serverPort, cbuf_handle_t video_buf){
 	//close physical memory
 	munmap_fpga_peripherals();
     close_physical_memory_device();
-	
 }
 
 void run_client(char* serverIP, int serverPort){
@@ -144,7 +142,6 @@ void recv_video(cbuf_handle_t video_buffer){
     int recvLen = 0;
     int fifoStatus = 0;
     
-
     while(1){
         recvLen = recv_data(&recvAddr, data);
         
@@ -168,15 +165,16 @@ void recv_video(cbuf_handle_t video_buffer){
             continue;
         }
         
-
         if(addrMatch(&recvAddr, &clientAddr)){
-            send_data_buffer(&data[3], dataLen, video_buffer);
-            /*if(fifoStatus == BUFFER_FULL){
-                send_packet_type(&clientAddr, SEND_SLOW);
+            int bufferSpace = get_space(video_buffer);
+            if(bufferSpace >= dataLen){
+                send_data_buffer(&data[3], dataLen, video_buffer);
             }
-            else if(fifoStatus == BUFFER_EMPTY){
-                send_packet_type(&clientAddr, SEND_FAST);
-            }*/
+            else{/*
+                printf("buffer is full\n");
+                printf("space left: %d\n", bufferSpace);
+                printf("space required: %d\n", dataLen);*/
+            }
         }
         else{
             send_packet_type(&clientAddr, TERMINATE);
@@ -194,9 +192,16 @@ void print_help(){
     printf("./main.out -s -p PORT\n");
     printf("Example server:\n");
     printf("./main.out -s -p 1234\n");
+    printf("Default server uses:\n");
+    printf("Port: 1337\n");
+
     printf("\n");
+
     printf("Client syntax\n");
     printf("./main.out -c -ip IP -p PORT\n");
     printf("Example client:\n");
     printf("./main.out -c -ip 127.0.0.1 -p 1234\n");
+    printf("Default client uses:\n");
+    printf("IP: 127.0.0.1\n");
+    printf("Port: 1337\n");
 }

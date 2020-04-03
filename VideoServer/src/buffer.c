@@ -31,7 +31,7 @@ void read_data_buffer(char* data, int amount, cbuf_handle_t buf){
 }
 
 int get_space(cbuf_handle_t buf){
-    if(buf->head > buf->tail){
+    if(buf->head < buf->tail){
         return buf->max - ((buf->head + buf->max) - buf->tail);
     }
     else{
