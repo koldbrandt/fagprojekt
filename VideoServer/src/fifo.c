@@ -20,7 +20,7 @@
 
 #define alt_write_word(dest, src)       (*ALT_CAST(volatile uint32_t *, (dest)) = (src))
 
-volatile uint16_t * fifo_framing_transmit_ptr = NULL ;
+volatile uint8_t * fifo_framing_transmit_ptr = NULL ;
 volatile unsigned int * fifo_framing_status_ptr = NULL ;
 volatile unsigned int * fpga_leds = NULL;
 volatile unsigned int * fpga_switches = NULL;
@@ -106,12 +106,13 @@ void* fifo_write_thread(void* buffer){
 }
 
 int send_data_fifo(char data){
-
+	printf("FIFO to framing block full value %d \n", FIFO_FRAMING_FULL);
     if (!FIFO_FRAMING_FULL) {
 		*fifo_framing_transmit_ptr = data;
+		printf("%d \n", data);
 		printf("FIFO to framing block Empty value %d \n", FIFO_FRAMING_EMPTY);
-		printf("FIFO to framing block Full value %d \n", FIFO_FRAMING_FULL);
-		printf("FIFO to framing block fill level %d \n", *fifo_framing_status_ptr);
+		// printf("FIFO to framing block Full value %d \n", FIFO_FRAMING_FULL);
+		// printf("FIFO to framing block fill level %d \n", *fifo_framing_status_ptr);
 		
 		
 		return 1;
