@@ -23,6 +23,6 @@ int recv_data(struct sockaddr_in* src, char* data);
 int send_data(struct sockaddr_in* dest, char* data, int len);
 int addrMatch(struct sockaddr_in* addr1, struct sockaddr_in* addr2);
 void send_packet_type(struct sockaddr_in* dest, char type);
-int close_connection();
+void close_connection();
 
 #endif // CONNECTION_H

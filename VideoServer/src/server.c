@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
+#include "buffer.h"
 #include "server.h"
 #include "connection.h"
 #include "fifo.h"
+
+#define VIDEO_BUFFER_SIZE 20
 
 struct sockaddr_in clientAddr;
 int connectionStatus;
@@ -17,10 +19,9 @@ enum connection_status{
 
 void run_server(int serverPort){
     init_server_socket(serverPort);
-
-    cbuf_handle_t video_buffer = init_buffer();
+    cbuf_handle_t video_buffer = init_buffer(VIDEO_BUFFER_SIZE);
     pthread_create(&fifoWriteThreadId, NULL, &fifo_write_thread, video_buffer);
-    
+
     printf("Starting in server mode on port %d\n", serverPort);
     connectionStatus = WAITING_INIT;
 	
@@ -40,6 +41,7 @@ void run_server(int serverPort){
         }
     }
 	pthread_join(fifoWriteThreadId, NULL);
+    free_buffer(video_buffer);
 	//close physical memory
 	munmap_fpga_peripherals();
     close_physical_memory_device();
@@ -61,9 +63,7 @@ void wait_init(struct sockaddr_in* client){
 void recv_video(cbuf_handle_t video_buffer){
     struct sockaddr_in recvAddr;
     char data[MAX_PACKET_SIZE];
-    int dataLen = 0;
     int recvLen = 0;
-    int fifoStatus = 0;
     
     while(1){
         recvLen = recv_data(&recvAddr, data);

@@ -40,11 +40,13 @@ int init_client_socket(struct sockaddr_in* serverAddr, char* serverIP, int port)
     serverAddr->sin_family = AF_INET; 
     serverAddr->sin_addr.s_addr = inet_addr(serverIP); 
     serverAddr->sin_port = htons(port);
+    return 0;
 }
 
 int recv_data(struct sockaddr_in* src, char* data){
-    int clientLen, recv_len;
+    int recv_len;
     
+    socklen_t clientLen;
     recv_len = -1;
 
     clientLen = sizeof(*src);
@@ -59,13 +61,14 @@ int recv_data(struct sockaddr_in* src, char* data){
 
 int send_data(struct sockaddr_in* dest, char* data, int len){
     sendto(sockfd, data, len, 0, (struct sockaddr *) dest, sizeof(*dest));
+    return 0;
 }
 
 int addrMatch(struct sockaddr_in* addr1, struct sockaddr_in* addr2){
     return (addr1->sin_addr.s_addr == addr2->sin_addr.s_addr) && (addr1->sin_port == addr2->sin_port);
 }
 
-int close_connection(){
+void close_connection(){
     close(sockfd);
 }
 

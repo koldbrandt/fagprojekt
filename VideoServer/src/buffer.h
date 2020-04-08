@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <pthread.h>
 
-#define VIDEO_BUFFER_SIZE 2000
+
 
 enum buffer_status{
     BUFFER_FULL,
@@ -14,7 +14,7 @@ typedef struct circular_buf_t circular_buf_t;
 typedef circular_buf_t* cbuf_handle_t;
 
 struct circular_buf_t {
-	char buffer[VIDEO_BUFFER_SIZE];
+	char* buffer;
 	size_t head;
 	size_t tail;
 	size_t max; //of the buffer
@@ -24,7 +24,8 @@ struct circular_buf_t {
 void read_data_buffer(char* data, int amount, cbuf_handle_t buf);
 void send_data_buffer(char* data, int dataLen, cbuf_handle_t buf);
 int get_space(cbuf_handle_t buf);
-cbuf_handle_t init_buffer();
+cbuf_handle_t init_buffer(size_t size);
+void free_buffer(cbuf_handle_t buf);
 int buffer_is_empty(cbuf_handle_t buf);
 
 #endif // BUFFER_H

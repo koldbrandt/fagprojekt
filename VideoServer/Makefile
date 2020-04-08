@@ -7,7 +7,7 @@ DEPS=$(wildcard $(SRC_DIR)/*.h)
 SRC=$(wildcard $(SRC_DIR)/*.c)
 
 # Build flags to use
-CFLAGS=-I$(SRC_DIR)
+CFLAGS=-I$(SRC_DIR) -Wall
 LDFLAGS=-lpthread
 
 # Path where compiled files should be build to

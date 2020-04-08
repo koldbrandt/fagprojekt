@@ -41,18 +41,21 @@ int get_space(cbuf_handle_t buf){
 
 void free_buffer(cbuf_handle_t buf){
     free(buf->buffer);
+    free(buf);
 }
 
 int buffer_is_empty(cbuf_handle_t buf){
     return buf->head == buf->tail;
 }
 
-cbuf_handle_t init_buffer(){
+cbuf_handle_t init_buffer(size_t size){
     cbuf_handle_t cbuf = malloc(sizeof(circular_buf_t));
+    char* buf = malloc(size * sizeof(char));
+    cbuf->buffer = buf;
     cbuf->head = 0;
     cbuf->tail = 0;
     cbuf->full = 0;
-    cbuf->max = VIDEO_BUFFER_SIZE;
+    cbuf->max = size;
     if (pthread_mutex_init(&(cbuf->lock), NULL) != 0)
     {
         printf("\n mutex init failed\n");
