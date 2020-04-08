@@ -109,7 +109,6 @@ int send_data_fifo(char data){
 	printf("FIFO to framing block full value %d \n", FIFO_FRAMING_FULL);
     if (!FIFO_FRAMING_FULL) {
 		*fifo_framing_transmit_ptr = data;
-		printf("%d \n", data);
 		printf("FIFO to framing block Empty value %d \n", FIFO_FRAMING_EMPTY);
 		// printf("FIFO to framing block Full value %d \n", FIFO_FRAMING_FULL);
 		// printf("FIFO to framing block fill level %d \n", *fifo_framing_status_ptr);

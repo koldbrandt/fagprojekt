@@ -1,7 +1,10 @@
 #ifndef BUFFER_H
 #define BUFFER_H
 
-#define VIDEO_BUFFER_SIZE 20
+#include <stdio.h>
+#include <pthread.h>
+
+#define VIDEO_BUFFER_SIZE 2000
 
 enum buffer_status{
     BUFFER_FULL,

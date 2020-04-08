@@ -68,3 +68,8 @@ int addrMatch(struct sockaddr_in* addr1, struct sockaddr_in* addr2){
 int close_connection(){
     close(sockfd);
 }
+
+void send_packet_type(struct sockaddr_in* dest, char type){
+    char response = type;
+    send_data(dest, &response, 1);
+}
