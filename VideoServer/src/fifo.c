@@ -91,25 +91,24 @@ void munmap_fpga_peripherals() {
 }
 
 void* fifo_write_thread(void* buffer){
-    char tempRead[1];
+    char readData[1];
     cbuf_handle_t video_buffer = (cbuf_handle_t) buffer;
-    int data;
     while(1){
         if(!buffer_is_empty(video_buffer)){
-            read_data_buffer(tempRead, 1, video_buffer);
-            printf("read: %c\n", tempRead[0]);
-            send_data_fifo(tempRead[0]);
+            read_data_buffer(readData, 1, video_buffer);
+            printf("read: %c\n", readData[0]);
+            send_data_fifo(readData[0]);
         }
-        usleep(200000); //should use nanosleep but i cba
+        usleep(200000);
         //sleeping is needed to not use 100% cpu
     }
 }
 
 int send_data_fifo(char data){
-	printf("FIFO to framing block full value %d \n", FIFO_FRAMING_FULL);
+	//printf("FIFO to framing block full value %d \n", FIFO_FRAMING_FULL);
     if (!FIFO_FRAMING_FULL) {
 		*fifo_framing_transmit_ptr = data;
-		printf("FIFO to framing block Empty value %d \n", FIFO_FRAMING_EMPTY);
+		//printf("FIFO to framing block Empty value %d \n", FIFO_FRAMING_EMPTY);
 		// printf("FIFO to framing block Full value %d \n", FIFO_FRAMING_FULL);
 		// printf("FIFO to framing block fill level %d \n", *fifo_framing_status_ptr);
 		

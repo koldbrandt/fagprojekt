@@ -15,10 +15,12 @@ enum connection_status{
     RECV_VIDEO
 };
 
-void run_server(int serverPort, cbuf_handle_t video_buf){
+void run_server(int serverPort){
     init_server_socket(serverPort);
+
+    cbuf_handle_t video_buffer = init_buffer();
+    pthread_create(&fifoWriteThreadId, NULL, &fifo_write_thread, video_buffer);
     
-    pthread_create(&fifoWriteThreadId, NULL, &fifo_write_thread, video_buf);
     printf("Starting in server mode on port %d\n", serverPort);
     connectionStatus = WAITING_INIT;
 	
@@ -33,7 +35,7 @@ void run_server(int serverPort, cbuf_handle_t video_buf){
                 break;
             
             case RECV_VIDEO:
-                recv_video(video_buf);
+                recv_video(video_buffer);
                 break;
         }
     }
@@ -78,7 +80,6 @@ void recv_video(cbuf_handle_t video_buffer){
             continue;
         }
         
-
         unsigned short len = 0;
         memcpy(&len, &data[1], 2);
         unsigned int dataLen = (unsigned int) len;
@@ -86,7 +87,6 @@ void recv_video(cbuf_handle_t video_buffer){
         if(dataLen <= 0 || type != VIDEO_DATA){
             continue;
         }
-        
         
         if(addrMatch(&recvAddr, &clientAddr)){
             int bufferSpace = get_space(video_buffer);

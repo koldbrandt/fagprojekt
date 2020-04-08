@@ -40,7 +40,7 @@ int get_space(cbuf_handle_t buf){
 }
 
 void free_buffer(cbuf_handle_t buf){
-
+    free(buf->buffer);
 }
 
 int buffer_is_empty(cbuf_handle_t buf){

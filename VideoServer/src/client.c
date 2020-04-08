@@ -39,7 +39,6 @@ void video_send_loop(){
         while (currentSize < MAX_PACKET_SIZE - VIDEO_HEADER_LENGTH){
             //dataBuffer[currentSize] = read_data_fifo() 
             currentSize += 1;
-            usleep(200000 / MAX_PACKET_SIZE);
         }
         send_video_packet(dataBuffer, currentSize);
     }

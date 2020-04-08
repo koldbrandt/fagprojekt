@@ -2,21 +2,19 @@
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 #include <stdlib.h>
-#include <pthread.h>
 
 #include "connection.h"
 #include "video.h"
 #include "server.h"
 #include "client.h"
-#include "buffer.h"
 
 int main(int argc, char *argv[]){
     if(argc == 1 || strcmp(argv[1],"-h") == 0){
         print_help();
         exit(0);
     }
+    
     int serverPort = SERVER_PORT;
     char* serverIP = SERVER_IP;
     char debug = 0;
@@ -32,8 +30,7 @@ int main(int argc, char *argv[]){
         }
     }
     if(strcmp(argv[1],"-s") == 0){
-        cbuf_handle_t video_buffer = init_buffer();
-        run_server(serverPort, video_buffer);
+        run_server(serverPort);
     }
     else if(strcmp(argv[1],"-c") == 0){
         if(debug == 1){
