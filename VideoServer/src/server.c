@@ -40,6 +40,7 @@ void run_server(int serverPort){
                 break;
         }
     }
+    close_connection();
 	pthread_join(fifoWriteThreadId, NULL);
     free_buffer(video_buffer);
 	//close physical memory
@@ -93,7 +94,9 @@ void recv_video(cbuf_handle_t video_buffer){
             if(bufferSpace >= dataLen){
                 send_data_buffer(&data[3], dataLen, video_buffer);
             }
-            else{/*
+            else{
+                send_packet_type(&clientAddr, SEND_SLOW);
+                /*
                 printf("buffer is full\n");
                 printf("space left: %d\n", bufferSpace);
                 printf("space required: %d\n", dataLen);*/

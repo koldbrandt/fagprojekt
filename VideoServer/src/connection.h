@@ -4,7 +4,7 @@
 #define MAX_PACKET_SIZE 1024
 #define SERVER_PORT 1337
 #define SERVER_IP "127.0.0.1"
-#define VIDEO_HEADER_LENGTH 2
+#define VIDEO_HEADER_LENGTH 3
 
 #include <arpa/inet.h>
 

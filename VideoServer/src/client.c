@@ -9,11 +9,17 @@
 
 
 #define DUMMY_DATA_LEN 11
+#define DEFAULT_SLEEP_TIME 10000
+#define SLEEP_TIME_INCREMENT 10000
+
 
 struct sockaddr_in serverAddr;
+pthread_t listenThreadId;
+int sleepTime; //used for adjusting send rate
 
 void run_client(char* serverIP, int serverPort){
     init_client_socket(&serverAddr, serverIP, serverPort);
+    
     print_init(serverIP, serverPort);
 
     send_packet_type(&serverAddr, INIT);
@@ -24,11 +30,15 @@ void run_client(char* serverIP, int serverPort){
 
     recv_data(&srcAddr, response);
 
+    sleepTime = DEFAULT_SLEEP_TIME;
+
     if(addrMatch(&srcAddr, &serverAddr) && response[0] == INIT_ACK){
+        //pthread_create(&listenThreadId, NULL, &client_listen_thread, NULL);
         video_send_loop();
     }
     
     close_connection();
+    pthread_join(listenThreadId, NULL);
 }
 
 void video_send_loop(){
@@ -41,11 +51,13 @@ void video_send_loop(){
             currentSize += 1;
         }
         send_video_packet(dataBuffer, currentSize);
+        usleep(sleepTime);
     }
 }
 
 void run_test_client(char* serverIP, int serverPort){
     init_client_socket(&serverAddr, serverIP, serverPort);
+    pthread_create(&listenThreadId, NULL, &client_listen_thread, NULL);
     print_init(serverIP, serverPort);
     printf("Running in debug mode\n");
     printf("Enter \n1 to send INIT \n2 to send VIDEO_DATA \n3 to send TERMINATE\n");
@@ -64,7 +76,6 @@ void run_test_client(char* serverIP, int serverPort){
                 sprintf(&packet[0], "0123456789");
                 printf("sent the string \"%s\" to the server as video data\n", "0123456789");
                 send_video_packet(packet, DUMMY_DATA_LEN);
-                printf("sent VIDEO_DATA\n");
                 break;
 
             case 3:
@@ -75,6 +86,8 @@ void run_test_client(char* serverIP, int serverPort){
                 break;
         }
     }
+    close_connection();
+    pthread_join(listenThreadId, NULL);
 }
 
 void send_video_packet(char* data, short len){
@@ -85,6 +98,25 @@ void send_video_packet(char* data, short len){
     memcpy(&packet[3], data, len);
     send_data(&serverAddr, packet, length);
     free(packet);
+}
+
+void* client_listen_thread(){
+    printf("started listening\n");
+    char buffer[MAX_PACKET_SIZE];
+    struct sockaddr_in datasrc;
+    while(1){
+        recv_data(&datasrc, buffer);
+        if(buffer[0] == SEND_SLOW){
+            sleepTime += SLEEP_TIME_INCREMENT;
+        }
+        else if(buffer[0] == SEND_FAST){
+            sleepTime -= SLEEP_TIME_INCREMENT;
+        }
+        if(sleepTime < 0){
+            sleepTime = 1;
+        }
+        printf("current sleep: %d\n", sleepTime);
+    }
 }
 
 void print_init(char* serverIP, int serverPort){

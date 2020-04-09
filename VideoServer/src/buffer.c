@@ -11,10 +11,11 @@ void send_data_buffer(char* data, int dataLen, cbuf_handle_t buf){
         send_data_buffer(data + split, dataLen - split, buf);
     }
     else{
-        pthread_mutex_lock(&(buf->lock));
+        //pthread_mutex_lock(&buf->lock); 
         memcpy(&(buf->buffer[buf->head]), data, dataLen);
         buf->head = (buf->head + dataLen) % buf->max;
-        pthread_mutex_unlock(&(buf->lock));
+        buf->full = buf->head == buf->tail;
+        //pthread_mutex_unlock(&buf->lock); 
     }
 }
 
@@ -27,15 +28,21 @@ void read_data_buffer(char* data, int amount, cbuf_handle_t buf){
     else{
         memcpy(data, &(buf->buffer[buf->tail]), amount);
         buf->tail = (buf->tail + amount) % buf->max;
+        buf->full = 0;
     }
 }
 
 int get_space(cbuf_handle_t buf){
-    if(buf->head < buf->tail){
-        return buf->max - ((buf->head + buf->max) - buf->tail);
+    if(buf->full){
+        return 0;
     }
     else{
-        return buf->max - (buf->head - buf->tail);
+        if(buf->head < buf->tail){
+            return buf->max - ((buf->head + buf->max) - buf->tail);
+        }
+        else{
+            return buf->max - (buf->head - buf->tail);
+        }
     }
 }
 
@@ -45,7 +52,7 @@ void free_buffer(cbuf_handle_t buf){
 }
 
 int buffer_is_empty(cbuf_handle_t buf){
-    return buf->head == buf->tail;
+    return get_space(buf) == buf->max;
 }
 
 cbuf_handle_t init_buffer(size_t size){
@@ -61,5 +68,12 @@ cbuf_handle_t init_buffer(size_t size){
         printf("\n mutex init failed\n");
     }
     return cbuf;
+}
+
+void print_buffer(cbuf_handle_t buf){
+    for(int i = 0; i < buf->max; i++){
+        printf("%d ", buf->buffer[i]);
+    }
+    printf("\n");
 }
 

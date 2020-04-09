@@ -27,5 +27,6 @@ int get_space(cbuf_handle_t buf);
 cbuf_handle_t init_buffer(size_t size);
 void free_buffer(cbuf_handle_t buf);
 int buffer_is_empty(cbuf_handle_t buf);
+void print_buffer(cbuf_handle_t buf);
 
 #endif // BUFFER_H

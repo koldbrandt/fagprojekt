@@ -6,5 +6,6 @@ void run_test_client(char* serverIP, int serverPort);
 void print_init(char* serverIP, int serverPort);
 void send_video_packet(char* data, short len);
 void video_send_loop();
+void* client_listen_thread();
 
 #endif // CLIENT_H
