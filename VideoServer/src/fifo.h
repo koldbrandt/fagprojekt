@@ -1,8 +1,6 @@
 #ifndef FIFO_H
 #define FIFO_H
 
-#include "buffer.h"
-
 int send_data_fifo(char data);
 void mmap_fpga_peripherals();
 void munmap_fpga_peripherals();

@@ -1,15 +1,8 @@
 #ifndef BUFFER_H
 #define BUFFER_H
 
-#include <stdio.h>
 #include <pthread.h>
 
-
-
-enum buffer_status{
-    BUFFER_FULL,
-    BUFFER_EMPTY
-};
 typedef struct circular_buf_t circular_buf_t;
 typedef circular_buf_t* cbuf_handle_t;
 
@@ -27,6 +20,7 @@ int get_space(cbuf_handle_t buf);
 cbuf_handle_t init_buffer(size_t size);
 void free_buffer(cbuf_handle_t buf);
 int buffer_is_empty(cbuf_handle_t buf);
+int fill_level(cbuf_handle_t buf);
 void print_buffer(cbuf_handle_t buf);
 
 #endif // BUFFER_H

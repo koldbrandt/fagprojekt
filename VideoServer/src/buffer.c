@@ -1,8 +1,8 @@
 #include <pthread.h>
 #include <string.h>
 #include <stdio.h>
-#include "buffer.h"
 #include <stdlib.h>
+#include "buffer.h"
 
 void send_data_buffer(char* data, int dataLen, cbuf_handle_t buf){
     if(dataLen + buf->head > buf->max){
@@ -46,6 +46,10 @@ int get_space(cbuf_handle_t buf){
     }
 }
 
+int fill_level(cbuf_handle_t buf){
+    return buf->max - get_space(buf);
+}
+
 void free_buffer(cbuf_handle_t buf){
     free(buf->buffer);
     free(buf);
@@ -71,6 +75,7 @@ cbuf_handle_t init_buffer(size_t size){
 }
 
 void print_buffer(cbuf_handle_t buf){
+    printf("buffer: ");
     for(int i = 0; i < buf->max; i++){
         printf("%d ", buf->buffer[i]);
     }

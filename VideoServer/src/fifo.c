@@ -8,11 +8,10 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <unistd.h>
-#include "buffer.h"
-
 
 #include "hps_soc_system.h"
 #include "fifo.h"
+#include "buffer.h"
 #include "hps_linux.h"
 
 #define FIFO_FRAMING_FULL		  ((*(fifo_framing_status_ptr+1))& 1 ) 
