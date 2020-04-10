@@ -76,3 +76,10 @@ void send_packet_type(struct sockaddr_in* dest, char type){
     char response = type;
     send_data(dest, &response, 1);
 }
+
+void print_data(char* data, int len){
+    for(int i = 0; i < len; i++){
+        printf("%c", data[i]);
+    }
+    printf("\n");
+}

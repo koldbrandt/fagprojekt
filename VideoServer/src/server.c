@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "buffer.h"
 #include "server.h"
@@ -98,7 +99,8 @@ void recv_video(cbuf_handle_t video_buffer){
             int bufferSpace = get_space(video_buffer);
             if(bufferSpace >= dataLen){
                 send_data_buffer(&data[3], dataLen, video_buffer);
-				printf("%s \n",&data[3] );
+                printf("received data: ");
+				print_data(&data[3], dataLen);
             }
             else{
                 send_packet_type(&clientAddr, SEND_SLOW);
@@ -111,6 +113,20 @@ void recv_video(cbuf_handle_t video_buffer){
         else{
             send_packet_type(&clientAddr, TERMINATE);
         }
+    }
+}
+
+void* fifo_write_thread(void* buffer){
+    char readData[1];
+    cbuf_handle_t video_buffer = (cbuf_handle_t) buffer;
+    while(1){
+        if(!buffer_is_empty(video_buffer)){
+            read_data_buffer(readData, 1, video_buffer);
+            printf("sent to fifo: %c\n", readData[0]);
+            send_data_fifo(readData[0]);
+        }
+        usleep(200000);
+        //sleeping is needed to not use 100% cpu
     }
 }
 

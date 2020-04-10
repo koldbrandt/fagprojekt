@@ -46,7 +46,6 @@ void close_physical_memory_device() {
     close(fd_dev_mem);
 }
 
-
 void mmap_fpga_peripherals() {
     h2f_lw_axi_master = mmap(NULL, h2f_lw_axi_master_span, PROT_READ | PROT_WRITE, MAP_SHARED, fd_dev_mem, h2f_lw_axi_master_ofst);
     if (h2f_lw_axi_master == MAP_FAILED) {
@@ -68,7 +67,6 @@ void mmap_fpga_peripherals() {
 	fifo_framing_rxstatus_ptr = (unsigned int *)(h2f_lw_axi_master +  FIFO_RX_VIDEO_OUT_CSR_BASE);
 }
 
-
 void munmap_fpga_peripherals() {
     if (munmap(h2f_lw_axi_master, h2f_lw_axi_master_span) != 0) {
         printf("Error: h2f_lw_axi_master munmap() failed\n");
@@ -88,21 +86,6 @@ void munmap_fpga_peripherals() {
 	fifo_framing_txstatus_ptr = NULL ;
 	fifo_framing_receive_ptr = NULL ;
 	fifo_framing_rxstatus_ptr = NULL ;
-
-}
-
-void* fifo_write_thread(void* buffer){
-    char readData[1];
-    cbuf_handle_t video_buffer = (cbuf_handle_t) buffer;
-    while(1){
-        if(!buffer_is_empty(video_buffer)){
-            read_data_buffer(readData, 1, video_buffer);
-            printf("read: %c\n", readData[0]);
-            send_data_fifo(readData[0]);
-        }
-        usleep(200000);
-        //sleeping is needed to not use 100% cpu
-    }
 }
 
 int send_data_fifo(char data){
@@ -128,5 +111,3 @@ int read_data_fifo(char* dataPtr){
     } 
 	return 1;
 }
-
-

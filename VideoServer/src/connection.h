@@ -22,6 +22,7 @@ int init_client_socket(struct sockaddr_in* serverAddr, char* serverIP, int port)
 int recv_data(struct sockaddr_in* src, char* data);
 int send_data(struct sockaddr_in* dest, char* data, int len);
 int addrMatch(struct sockaddr_in* addr1, struct sockaddr_in* addr2);
+void print_data(char* data, int len);
 void send_packet_type(struct sockaddr_in* dest, char type);
 void close_connection();
 
