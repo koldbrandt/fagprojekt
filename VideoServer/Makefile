@@ -15,4 +15,4 @@ BUILD_DIR=build
 
 #
 main:$(SRC)
-	$(CC) $(CFLAGS) -o $(BUILD_DIR)/main.out $^ $(LDFLAGS)
+	$(CC) $(CFLAGS) -o $(BUILD_DIR)/video $^ $(LDFLAGS)

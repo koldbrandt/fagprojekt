@@ -45,21 +45,24 @@ int main(int argc, char *argv[]){
 }
 
 void print_help(){
-    printf("Server syntax\n");
-    printf("./main.out -s -p PORT\n");
-    printf("Example server:\n");
-    printf("./main.out -s -p 1234\n");
-    printf("Default server uses:\n");
-    printf("Port: 1337\n");
-
+    printf("Usage:\n");
+    printf("video {-s|-c} [options]\n");
+    printf("video -h\n");
+    printf("    -s: Run as server\n");
+    printf("    -c: Run as client\n");
+    printf("    -h: Print this help message\n");
     printf("\n");
-
-    printf("Client syntax\n");
-    printf("./main.out -c -ip IP -p PORT\n");
-    printf("Additionally -d can be used for debug mode\n");
+    printf("Server options\n");
+    printf("    -p <port>: Set listen port [default: %d]\n", SERVER_PORT);
+    printf("    -nf:       Don't write to fifo\n");
+    printf("\n");
+    printf("Client options\n");
+    printf("    -p <port>: Set destination port [default: %d]\n", SERVER_PORT);
+    printf("    -ip <ip>:  Set destination ip   [default: %s]\n", SERVER_IP);
+    printf("    -d:        Run in debug mode\n");
+    printf("\n");
+    printf("Example server:\n");
+    printf("video -s -p 1234\n");
     printf("Example client:\n");
-    printf("./main.out -c -ip 127.0.0.1 -p 1234\n");
-    printf("Default client uses:\n");
-    printf("IP: 127.0.0.1\n");
-    printf("Port: 1337\n");
+    printf("video -c -ip 192.168.1.102 -p 1234\n");
 }
