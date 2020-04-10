@@ -48,7 +48,7 @@ void video_send_loop(){
         int currentSize = 0;
         char dataBuffer[MAX_PACKET_SIZE];
         while (currentSize < MAX_PACKET_SIZE - VIDEO_HEADER_LENGTH){
-            //dataBuffer[currentSize] = read_data_fifo() 
+            //dataBuffer[currentSize] = read_data_fifo();
             currentSize += 1;
         }
         send_video_packet(dataBuffer, currentSize);
@@ -61,7 +61,7 @@ void run_test_client(char* serverIP, int serverPort){
     pthread_create(&listenThreadId, NULL, &client_listen_thread, NULL);
     print_init(serverIP, serverPort);
     printf("Running in debug mode\n");
-    printf("Enter \n1 to send INIT \n2 to send VIDEO_DATA \n3 to send TERMINATE\n");
+    printf("Enter \n1 to send INIT \n2 to send dummy VIDEO_DATA \n3 to read and send VIDEO_DATA from FIFO to server \n4 to send TERMINATE\n");
     int choice = 0;
     while(1){
         scanf("%d", &choice);
@@ -80,6 +80,18 @@ void run_test_client(char* serverIP, int serverPort){
                 break;
 
             case 3:
+                printf("amount of bytes to read from fifo: ");
+                int amount = 0;
+                scanf("%d", &amount);
+                char* fifoData = malloc(amount * sizeof(char));
+                for(int i = 0; i < amount; i++){
+                    //fifoData[i] = read_data_fifo();
+                }
+                send_video_packet(fifoData, amount);
+                free(fifoData);
+                break;
+
+            case 4:
                 send_packet_type(&serverAddr, TERMINATE);
                 printf("sent TERMINATE, exiting..\n");
                 close_connection();
@@ -102,7 +114,7 @@ void send_video_packet(char* data, short len){
 }
 
 void* client_listen_thread(){
-    printf("started listening\n");
+    printf("started listening thread\n");
     char buffer[MAX_PACKET_SIZE];
     struct sockaddr_in datasrc;
     while(1){
