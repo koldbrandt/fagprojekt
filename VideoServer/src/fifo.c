@@ -107,7 +107,7 @@ void* fifo_write_thread(void* buffer){
 
 int send_data_fifo(char data){
 	//printf("FIFO to framing block full value %d \n", FIFO_FRAMING_FULL);
-    if (!FIFO_FRAMING_FULL) {
+    if (!FIFO_FRAMING_TX_FULL) {
 		*fifo_framing_transmit_ptr = data;
 		//printf("FIFO to framing block Empty value %d \n", FIFO_FRAMING_EMPTY);
 		// printf("FIFO to framing block Full value %d \n", FIFO_FRAMING_FULL);
@@ -119,11 +119,13 @@ int send_data_fifo(char data){
 	return 0;
 }
 
-char read_data_fifo(){
-	printf("Reading one value from Video Framing");
-		if (!FIFO_FRAMING_RX_EMPTY) return * fifo_framing_receive_ptr;
-		
-	return '0';
+int read_data_fifo(char* dataPtr){
+	printf("Reading one value from Video Framing\n");
+	if (!FIFO_FRAMING_TX_FULL){
+        *dataPtr = *fifo_framing_receive_ptr;
+        return 0;
+    } 
+	return 1;
 }
 
 

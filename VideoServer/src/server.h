@@ -6,6 +6,6 @@
 
 void wait_init(struct sockaddr_in* addr);
 void recv_video(cbuf_handle_t buf);
-void run_server(int serverPort);
+void run_server(int serverPort, int options);
 
 #endif // SERVER_H

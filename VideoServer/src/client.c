@@ -19,9 +19,7 @@ pthread_t listenThreadId;
 int sleepTime; //used for adjusting send rate
 
 void run_client(char* serverIP, int serverPort){
-    init_client_socket(&serverAddr, serverIP, serverPort);
-    
-    print_init(serverIP, serverPort);
+    init_client(serverIP, serverPort);
 
     send_packet_type(&serverAddr, INIT);
     printf("sent INIT\n");
@@ -38,8 +36,7 @@ void run_client(char* serverIP, int serverPort){
         video_send_loop();
     }
     
-    close_connection();
-    pthread_join(listenThreadId, NULL);
+    close_client();
 }
 
 void video_send_loop(){
@@ -47,9 +44,12 @@ void video_send_loop(){
     while(1){
         int currentSize = 0;
         char dataBuffer[MAX_PACKET_SIZE];
+        int returnValue = 0;
         while (currentSize < MAX_PACKET_SIZE - VIDEO_HEADER_LENGTH){
-            //dataBuffer[currentSize] = read_data_fifo();
-            currentSize += 1;
+            returnValue = read_data_fifo(&dataBuffer[currentSize]);
+            if(returnValue == 0){
+                currentSize += 1;
+            }
         }
         send_video_packet(dataBuffer, currentSize);
         usleep(sleepTime);
@@ -57,11 +57,15 @@ void video_send_loop(){
 }
 
 void run_test_client(char* serverIP, int serverPort){
-    init_client_socket(&serverAddr, serverIP, serverPort);
-    pthread_create(&listenThreadId, NULL, &client_listen_thread, NULL);
-    print_init(serverIP, serverPort);
+    init_client(serverIP, serverPort);
+    //pthread_create(&listenThreadId, NULL, &client_listen_thread, NULL);
     printf("Running in debug mode\n");
-    printf("Enter \n1 to send INIT \n2 to send dummy VIDEO_DATA \n3 to read and send VIDEO_DATA from FIFO to server \n4 to send TERMINATE\n");
+    printf("Enter \n"
+           "1 to send INIT \n"
+           "2 to send dummy VIDEO_DATA \n"
+           "3 to read and send VIDEO_DATA from FIFO to server \n"
+           "4 to send TERMINATE\n");
+
     int choice = 0;
     while(1){
         scanf("%d", &choice);
@@ -84,9 +88,16 @@ void run_test_client(char* serverIP, int serverPort){
                 int amount = 0;
                 scanf("%d", &amount);
                 char* fifoData = malloc(amount * sizeof(char));
+                int returnValue = 0;
                 for(int i = 0; i < amount; i++){
-                    //fifoData[i] = read_data_fifo();
+                    
+                    returnValue = read_data_fifo(&fifoData[i]);
+                    
+                    if(returnValue == 1){
+                        printf("tried to read from empty fifo\n");
+                    }
                 }
+                
                 send_video_packet(fifoData, amount);
                 free(fifoData);
                 break;
@@ -99,8 +110,7 @@ void run_test_client(char* serverIP, int serverPort){
                 break;
         }
     }
-    close_connection();
-    pthread_join(listenThreadId, NULL);
+    close_client();
 }
 
 void send_video_packet(char* data, short len){
@@ -130,6 +140,20 @@ void* client_listen_thread(){
         }
         printf("current sleep: %d\n", sleepTime);
     }
+}
+
+void init_client(char* serverIP, int serverPort){
+    init_client_socket(&serverAddr, serverIP, serverPort);
+    open_physical_memory_device();
+    mmap_fpga_peripherals();
+    print_init(serverIP, serverPort);
+}
+
+void close_client(){
+    close_connection();
+    pthread_join(listenThreadId, NULL);
+    munmap_fpga_peripherals();
+    close_physical_memory_device();
 }
 
 void print_init(char* serverIP, int serverPort){

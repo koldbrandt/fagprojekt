@@ -7,5 +7,6 @@ void munmap_fpga_peripherals();
 void open_physical_memory_device();
 void close_physical_memory_device();
 void* fifo_write_thread(void* buffer);
+int read_data_fifo(char* dataPtr);
 
 #endif // FIFO_H

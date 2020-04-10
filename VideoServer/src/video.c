@@ -16,6 +16,7 @@ int main(int argc, char *argv[]){
     int serverPort = SERVER_PORT;
     char* serverIP = SERVER_IP;
     char debug = 0;
+    int serverOptions = 0;
     for(int i = 0; i < argc; i++){
         if(strcmp(argv[i],"-p") == 0){
             serverPort = atoi(argv[i + 1]);
@@ -26,9 +27,12 @@ int main(int argc, char *argv[]){
         if(strcmp(argv[i], "-d") == 0){
             debug = 1;
         }
+        if(strcmp(argv[i], "-nf") == 0){
+            serverOptions = 1;
+        }
     }
     if(strcmp(argv[1],"-s") == 0){
-        run_server(serverPort);
+        run_server(serverPort, serverOptions);
     }
     else if(strcmp(argv[1],"-c") == 0){
         if(debug == 1){

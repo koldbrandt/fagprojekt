@@ -18,10 +18,14 @@ enum connection_status{
     RECV_VIDEO
 };
 
-void run_server(int serverPort){
+void run_server(int serverPort, int options){
     init_server_socket(serverPort);
     cbuf_handle_t video_buffer = init_buffer(VIDEO_BUFFER_SIZE);
-    pthread_create(&fifoWriteThreadId, NULL, &fifo_write_thread, video_buffer);
+    if(options == 0){
+        printf("creating fifo write thread\n");
+        pthread_create(&fifoWriteThreadId, NULL, &fifo_write_thread, video_buffer);
+    }
+    
 
     printf("Starting in server mode on port %d\n", serverPort);
     connectionStatus = WAITING_INIT;
