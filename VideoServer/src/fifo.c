@@ -14,15 +14,17 @@
 #include "buffer.h"
 #include "hps_linux.h"
 
-#define FIFO_FRAMING_FULL		  ((*(fifo_framing_status_ptr+1))& 1 ) 
-#define FIFO_FRAMING_EMPTY	  ((*(fifo_framing_status_ptr+1))& 2 ) 
+#define FIFO_FRAMING_TX_FULL		  ((*(fifo_framing_txstatus_ptr+1))& 1 ) 
+#define FIFO_FRAMING_TX_EMPTY	  ((*(fifo_framing_txstatus_ptr+1))& 2 ) 
+#define FIFO_FRAMING_RX_FULL		  ((*(fifo_framing_rxstatus_ptr+1))& 1 ) 
+#define FIFO_FRAMING_RX_EMPTY	  ((*(fifo_framing_rxstatus_ptr+1))& 2 ) 
 
 #define alt_write_word(dest, src)       (*ALT_CAST(volatile uint32_t *, (dest)) = (src))
 
-volatile uint8_t * fifo_framing_transmit_ptr = NULL ;
-volatile unsigned int * fifo_framing_status_ptr = NULL ;
-volatile unsigned int * fpga_leds = NULL;
-volatile unsigned int * fpga_switches = NULL;
+volatile unsigned char * fifo_framing_receive_ptr = NULL ;
+volatile unsigned int  * fifo_framing_rxstatus_ptr = NULL ;
+volatile unsigned char * fifo_framing_transmit_ptr = NULL ;
+volatile unsigned int  * fifo_framing_txstatus_ptr = NULL ;
 
 
 void open_physical_memory_device() {
@@ -60,10 +62,10 @@ void mmap_fpga_peripherals() {
         close(fd_dev_mem);
         exit(EXIT_FAILURE);
     }
-	fifo_framing_transmit_ptr = (unsigned int *) (h2f_axi_master + FIFO_TX_VIDEO_IN_BASE);
-	fifo_framing_status_ptr = (unsigned int *)(h2f_lw_axi_master +  FIFO_TX_VIDEO_IN_CSR_BASE);
-	fpga_leds =   (unsigned int *) (h2f_lw_axi_master +  HPS_FPGA_LEDS_BASE);
-	fpga_switches = h2f_lw_axi_master + HPS_FPGA_SWITCHES_BASE;
+	fifo_framing_transmit_ptr = (unsigned char *) (h2f_axi_master + FIFO_TX_VIDEO_IN_BASE);
+	fifo_framing_txstatus_ptr = (unsigned int *)(h2f_lw_axi_master +  FIFO_TX_VIDEO_IN_CSR_BASE);
+	fifo_framing_receive_ptr = (unsigned char *) (h2f_axi_master + FIFO_RX_VIDEO_OUT_BASE);
+	fifo_framing_rxstatus_ptr = (unsigned int *)(h2f_lw_axi_master +  FIFO_RX_VIDEO_OUT_CSR_BASE);
 }
 
 
@@ -82,10 +84,10 @@ void munmap_fpga_peripherals() {
     }
     h2f_lw_axi_master = NULL;
 	h2f_axi_master    = NULL;
-    fpga_leds         = NULL;
-	fpga_switches	  = NULL;
 	fifo_framing_transmit_ptr = NULL ;
-	fifo_framing_status_ptr = NULL ;
+	fifo_framing_txstatus_ptr = NULL ;
+	fifo_framing_receive_ptr = NULL ;
+	fifo_framing_rxstatus_ptr = NULL ;
 
 }
 
@@ -116,3 +118,12 @@ int send_data_fifo(char data){
 	}
 	return 0;
 }
+
+char read_data_fifo(){
+	printf("Reading one value from Video Framing");
+		if (!FIFO_FRAMING_RX_EMPTY) return * fifo_framing_receive_ptr;
+		
+	return '0';
+}
+
+
