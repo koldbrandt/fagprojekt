@@ -98,6 +98,7 @@ void recv_video(cbuf_handle_t video_buffer){
             int bufferSpace = get_space(video_buffer);
             if(bufferSpace >= dataLen){
                 send_data_buffer(&data[3], dataLen, video_buffer);
+				printf("%s \n",&data[3] );
             }
             else{
                 send_packet_type(&clientAddr, SEND_SLOW);
