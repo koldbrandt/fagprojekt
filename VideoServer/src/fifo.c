@@ -103,10 +103,10 @@ int send_data_fifo(char data){
 }
 
 int read_data_fifo(char* dataPtr){
-	printf("Reading one value from Video Framing\n");
+	//printf("Reading one value from Video Framing\n");
 	if (!FIFO_FRAMING_RX_FULL){
         *dataPtr = *fifo_framing_receive_ptr;
-		printf("%c \n",*dataPtr);
+		//printf("%c \n",*dataPtr);
         return 0;
     } 
 	return 1;

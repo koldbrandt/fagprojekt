@@ -25,7 +25,7 @@ enum connection_status{
 void run_server(int serverPort, int options){
     init_server_socket(serverPort);
     printf("Starting in server mode on port %d\n", serverPort);
-    if(is_option_set(options, RUN_IPERF)){
+    if(is_option_set(options, SERVER_RUN_IPERF)){
         run_server_iperf(options);
         return;
     }
@@ -172,12 +172,11 @@ void run_server_iperf(int options){
 void recv_video_iperf(cbuf_handle_t video_buffer){
     struct sockaddr_in recvAddr;
     char data[IPERF_PACKET_SIZE];
+    unsigned int dataLen = IPERF_PACKET_SIZE;
 
     while(1){
         recv_data(&recvAddr, data);
         
-        unsigned int dataLen = IPERF_PACKET_SIZE;
-
         int bufferSpace = get_space(video_buffer);
         //printf("received: %d\n", dataLen);
         double used = (double) fill_level(video_buffer);

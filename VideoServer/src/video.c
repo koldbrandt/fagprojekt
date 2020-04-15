@@ -22,6 +22,10 @@ int main(int argc, char *argv[]){
         if(strcmp(argv[i],"-p") == 0){
             serverPort = atoi(argv[i + 1]);
         }
+        if(strcmp(argv[i], "-iperf") == 0){
+            serverOptions = serverOptions | SERVER_RUN_IPERF;
+            clientOptions = clientOptions | CLIENT_RUN_IPERF;
+        }
 
         //client options
         if(strcmp(argv[i],"-ip") == 0){
@@ -34,9 +38,6 @@ int main(int argc, char *argv[]){
         //server options
         if(strcmp(argv[i], "-nf") == 0){
             serverOptions = serverOptions | NO_FIFO;
-        }
-        if(strcmp(argv[i], "-iperf") == 0){
-            serverOptions = serverOptions | RUN_IPERF;
         }
     }
     if(strcmp(argv[1],"-s") == 0){
@@ -59,8 +60,8 @@ void print_help(){
     printf("Server options\n");
     printf("    -p <port>: Set listen port [default: %d]\n", SERVER_PORT);
     printf("    -nf:       Don't write to fifo\n");
-    printf("    -iperf:    Put all data received into the FIFO, regardless of headers and \n");
-    printf("               video protocol. Used for testing with iperf client\n");
+    printf("    -iperf:    Ignore protocol and put all data received from the socket\n");
+    printf("               into the FIFO. Used for testing with iperf client\n");
 
     printf("\n");
 
@@ -68,6 +69,8 @@ void print_help(){
     printf("    -p <port>: Set destination port [default: %d]\n", SERVER_PORT);
     printf("    -ip <ip>:  Set destination ip   [default: %s]\n", SERVER_IP);
     printf("    -d:        Run in debug mode\n");
+    printf("    -iperf:    Ignore protocol and send data as fast as availible in the FIFO.\n");
+    printf("               Used when connecting to iperf server\n");
     printf("\n");
 
     printf("Example server:\n");

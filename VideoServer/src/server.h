@@ -6,7 +6,7 @@
 
 enum server_options{
     NO_FIFO = 1,
-    RUN_IPERF = 2
+    SERVER_RUN_IPERF = 2
 };
 
 void wait_init(struct sockaddr_in* addr);

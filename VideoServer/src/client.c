@@ -25,6 +25,11 @@ void run_client(char* serverIP, int serverPort, int options){
         return;
     }
 
+    if(is_option_set(options, CLIENT_RUN_IPERF)){
+        video_send_loop();
+        return;
+    }
+
     send_packet_type(&serverAddr, INIT);
     printf("sent INIT\n");
 
@@ -32,7 +37,7 @@ void run_client(char* serverIP, int serverPort, int options){
     char response[MAX_PACKET_SIZE];
 
     recv_data(&srcAddr, response);
-
+    
     sleepTime = DEFAULT_SLEEP_TIME;
 
     if(addrMatch(&srcAddr, &serverAddr) && response[0] == INIT_ACK){
