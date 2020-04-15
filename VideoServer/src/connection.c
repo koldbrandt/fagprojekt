@@ -83,3 +83,7 @@ void print_data(char* data, int len){
     }
     printf("\n");
 }
+
+int is_option_set(int value, int option){
+    return (value & option) == option;
+}

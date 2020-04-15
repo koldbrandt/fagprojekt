@@ -2,6 +2,7 @@
 #define CONNECTION_H
 
 #define MAX_PACKET_SIZE 1024
+
 #define SERVER_PORT 1337
 #define SERVER_IP "127.0.0.1"
 #define VIDEO_HEADER_LENGTH 3
@@ -24,6 +25,7 @@ int send_data(struct sockaddr_in* dest, char* data, int len);
 int addrMatch(struct sockaddr_in* addr1, struct sockaddr_in* addr2);
 void print_data(char* data, int len);
 void send_packet_type(struct sockaddr_in* dest, char type);
+int is_option_set(int value, int option);
 void close_connection();
 
 #endif // CONNECTION_H
