@@ -54,7 +54,7 @@ void video_send_loop(){
                 currentSize += 1;
             }
             else{
-                usleep(1);
+                usleep(1); //wait for fifo to not be empty
             }
         }
         send_video_packet(dataBuffer, currentSize);

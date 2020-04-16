@@ -122,13 +122,18 @@ void recv_video(cbuf_handle_t video_buffer){
 void* fifo_write_thread(void* buffer){
     char readData[1];
     cbuf_handle_t video_buffer = (cbuf_handle_t) buffer;
+    int sendStatus = 0;
     while(1){
         if(!buffer_is_empty(video_buffer)){
             read_data_buffer(readData, 1, video_buffer);
-            send_data_fifo(readData[0]);
+            sendStatus = send_data_fifo(readData[0]);
+            while(sendStatus == 1){
+                usleep(1); //wait for fifo to not be full
+                sendStatus = send_data_fifo(readData[0]);
+            }
         }
         else{
-            usleep(1); //sleeping is needed to not use 100% cpu
+            usleep(1); //wait for video buffer to fill up
         } 
     }
 }

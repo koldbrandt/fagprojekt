@@ -89,24 +89,16 @@ void munmap_fpga_peripherals() {
 }
 
 int send_data_fifo(char data){
-	//printf("FIFO to framing block full value %d \n", FIFO_FRAMING_FULL);
     if (!FIFO_FRAMING_TX_FULL) {
 		*fifo_framing_transmit_ptr = data;
-		//printf("FIFO to framing block Empty value %d \n", FIFO_FRAMING_EMPTY);
-		// printf("FIFO to framing block Full value %d \n", FIFO_FRAMING_FULL);
-		// printf("FIFO to framing block fill level %d \n", *fifo_framing_status_ptr);
-		
-		
-		return 1;
+		return 0;
 	}
-	return 0;
+	return 1;
 }
 
 int read_data_fifo(char* dataPtr){
-	//printf("Reading one value from Video Framing\n");
-	if (!FIFO_FRAMING_RX_FULL){
+	if (!FIFO_FRAMING_RX_EMPTY){
         *dataPtr = *fifo_framing_receive_ptr;
-		//printf("%c \n",*dataPtr);
         return 0;
     } 
 	return 1;
