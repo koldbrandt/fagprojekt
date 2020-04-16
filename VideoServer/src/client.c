@@ -9,7 +9,7 @@
 #include "fifo.h"
 
 #define DUMMY_DATA_LEN 11
-#define DEFAULT_SLEEP_TIME 10
+#define DEFAULT_SLEEP_TIME 1
 #define SLEEP_TIME_INCREMENT 10000
 
 struct sockaddr_in serverAddr;
@@ -18,15 +18,12 @@ int sleepTime; //used for adjusting send rate
 
 void run_client(char* serverIP, int serverPort, int options){
     init_client(serverIP, serverPort);
+    sleepTime = DEFAULT_SLEEP_TIME;
     printf("Starting in client mode\n");
     printf("Connecting to %s on port %d\n", serverIP, serverPort);
+
     if(is_option_set(options, RUN_DEBUG)){
         run_test_client(serverIP, serverPort);
-        return;
-    }
-
-    if(is_option_set(options, CLIENT_RUN_IPERF)){
-        video_send_loop();
         return;
     }
 
@@ -38,8 +35,6 @@ void run_client(char* serverIP, int serverPort, int options){
 
     recv_data(&srcAddr, response);
     
-    sleepTime = DEFAULT_SLEEP_TIME;
-
     if(addrMatch(&srcAddr, &serverAddr) && response[0] == INIT_ACK){
         video_send_loop();
     }
@@ -58,6 +53,9 @@ void video_send_loop(){
             if(returnValue == 0){
                 currentSize += 1;
             }
+            else{
+                usleep(1);
+            }
         }
         send_video_packet(dataBuffer, currentSize);
         usleep(sleepTime);
@@ -66,11 +64,15 @@ void video_send_loop(){
 
 void run_test_client(char* serverIP, int serverPort){
     printf("Running in debug mode\n");
-    printf("Enter \n"
+    char* test_options = 
+           "Enter \n"
            "1 to send INIT \n"
            "2 to send dummy VIDEO_DATA \n"
            "3 to read and send VIDEO_DATA from FIFO to server \n"
-           "4 to send TERMINATE\n");
+           "4 to run the normal client program \n"
+           "5 to send TERMINATE\n";
+
+    printf("%s", test_options);
 
     int choice = 0;
     while(1){
@@ -109,6 +111,10 @@ void run_test_client(char* serverIP, int serverPort){
                 break;
 
             case 4:
+                video_send_loop();
+                break;
+
+            case 5:
                 send_packet_type(&serverAddr, TERMINATE);
                 printf("sent TERMINATE, exiting..\n");
                 close_connection();
@@ -144,7 +150,6 @@ void* client_listen_thread(){
         if(sleepTime < 0){
             sleepTime = 1;
         }
-        printf("current sleep: %d\n", sleepTime);
     }
 }
 

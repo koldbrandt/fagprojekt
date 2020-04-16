@@ -22,11 +22,7 @@ int main(int argc, char *argv[]){
         if(strcmp(argv[i],"-p") == 0){
             serverPort = atoi(argv[i + 1]);
         }
-        if(strcmp(argv[i], "-iperf") == 0){
-            serverOptions = serverOptions | SERVER_RUN_IPERF;
-            clientOptions = clientOptions | CLIENT_RUN_IPERF;
-        }
-
+        
         //client options
         if(strcmp(argv[i],"-ip") == 0){
             serverIP = argv[i + 1];
@@ -38,6 +34,9 @@ int main(int argc, char *argv[]){
         //server options
         if(strcmp(argv[i], "-nf") == 0){
             serverOptions = serverOptions | NO_FIFO;
+        }
+        if(strcmp(argv[i], "-iperf") == 0){
+            serverOptions = serverOptions | SERVER_RUN_IPERF;
         }
     }
     if(strcmp(argv[1],"-s") == 0){
@@ -69,7 +68,7 @@ void print_help(){
     printf("    -p <port>: Set destination port [default: %d]\n", SERVER_PORT);
     printf("    -ip <ip>:  Set destination ip   [default: %s]\n", SERVER_IP);
     printf("    -d:        Run in debug mode\n");
-    printf("    -iperf:    Ignore protocol and send data as fast as availible in the FIFO.\n");
+    printf("    -iperf:    Ignore protocol and send data as fast as it is available in the FIFO.\n");
     printf("               Used when connecting to iperf server\n");
     printf("\n");
 

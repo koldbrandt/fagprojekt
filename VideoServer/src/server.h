@@ -13,7 +13,7 @@ void wait_init(struct sockaddr_in* addr);
 void recv_video(cbuf_handle_t buf);
 void run_server(int serverPort, int options);
 void* fifo_write_thread(void* buffer);
-void run_server_iperf(int serverPort);
+void run_server_iperf(cbuf_handle_t video_buffer, int options);
 void recv_video_iperf(cbuf_handle_t buf);
 
 #endif // SERVER_H

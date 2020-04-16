@@ -24,24 +24,24 @@ enum connection_status{
 
 void run_server(int serverPort, int options){
     init_server_socket(serverPort);
-    printf("Starting in server mode on port %d\n", serverPort);
-    if(is_option_set(options, SERVER_RUN_IPERF)){
-        run_server_iperf(options);
-        return;
-    }
-    
     cbuf_handle_t video_buffer = init_buffer(VIDEO_BUFFER_SIZE);
+    
+    //Open physical memory 
+	open_physical_memory_device();
+    mmap_fpga_peripherals();
+
+    printf("Starting in server mode on port %d\n", serverPort);
     
     if(!is_option_set(options, NO_FIFO)){
         printf("creating fifo write thread\n");
         pthread_create(&fifoWriteThreadId, NULL, &fifo_write_thread, video_buffer);
     }
+    if(is_option_set(options, SERVER_RUN_IPERF)){
+        run_server_iperf(video_buffer, options);
+        return;
+    }
     
     connectionStatus = WAITING_INIT;
-	
-	//Open physical memory 
-	open_physical_memory_device();
-    mmap_fpga_peripherals();
 	
     while(1){
         switch(connectionStatus){
@@ -106,19 +106,11 @@ void recv_video(cbuf_handle_t video_buffer){
         if(addrMatch(&recvAddr, &clientAddr)){
             int bufferSpace = get_space(video_buffer);
             
-            //printf("received: %d\n", dataLen);
             if(bufferSpace >= dataLen){
                 send_data_buffer(&data[3], dataLen, video_buffer);
-                //printf("received data: ");
-				//print_data(&data[3], dataLen);
             }
             else{
                 send_packet_type(&clientAddr, SEND_SLOW);
-                /*
-                printf("buffer is full\n");
-                printf("space left: %d\n", bufferSpace);
-                printf("space required: %d\n", dataLen);
-                */
             }
         }
         else{
@@ -133,33 +125,19 @@ void* fifo_write_thread(void* buffer){
     while(1){
         if(!buffer_is_empty(video_buffer)){
             read_data_buffer(readData, 1, video_buffer);
-            //printf("sent to fifo: %c\n", readData[0]);
             send_data_fifo(readData[0]);
         }
         else{
-            usleep(10);
-            //sleeping is needed to not use 100% cpu
+            usleep(1); //sleeping is needed to not use 100% cpu
         } 
     }
 }
 
-void run_server_iperf(int options){
-    cbuf_handle_t video_buffer = init_buffer(VIDEO_BUFFER_SIZE);
-    if(!is_option_set(options, NO_FIFO)){
-        printf("creating fifo write thread\n");
-        pthread_create(&fifoWriteThreadId, NULL, &fifo_write_thread, video_buffer);
-    }
-    
+void run_server_iperf(cbuf_handle_t video_buffer, int options){
     printf("Running in iperf test mode\n");
     connectionStatus = RECV_VIDEO;
 	
-	//Open physical memory 
-	open_physical_memory_device();
-    mmap_fpga_peripherals();
-	
-    while(1){
-        recv_video_iperf(video_buffer);
-    }
+    recv_video_iperf(video_buffer);
 
     close_connection();
 	pthread_join(fifoWriteThreadId, NULL);
@@ -178,7 +156,6 @@ void recv_video_iperf(cbuf_handle_t video_buffer){
         recv_data(&recvAddr, data);
         
         int bufferSpace = get_space(video_buffer);
-        //printf("received: %d\n", dataLen);
         double used = (double) fill_level(video_buffer);
         double percent = (used / VIDEO_BUFFER_SIZE) * 100;
         if(percent - fill_highest > 1){
@@ -186,9 +163,7 @@ void recv_video_iperf(cbuf_handle_t video_buffer){
             fill_highest = percent;
         }
         if(bufferSpace >= dataLen){
-            send_data_buffer(&data[3], dataLen, video_buffer);
-            //printf("received data: ");
-            //print_data(&data[3], dataLen);
+            send_data_buffer(data, dataLen, video_buffer);
         }
         else{
             printf("buffer is full\n");
