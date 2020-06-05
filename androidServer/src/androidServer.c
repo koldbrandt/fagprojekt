@@ -10,6 +10,7 @@
 #define PORT 8080 
 #define SA struct sockaddr 
 int sockfd, connfd, len; 
+int connfd2;
 struct sockaddr_in servaddr, cli; 
 
 
@@ -74,14 +75,14 @@ void serverRead(void *threadID){
   
     while(1){
     // Accept the data packet from client and verification 
-    connfd = accept(sockfd, (SA*)&cli, &len); 
-    if (connfd < 0) { 
+    connfd2 = accept(sockfd, (SA*)&cli, &len); 
+    if (connfd2 < 0) { 
         printf("server acccept failed...\n"); 
         exit(0); 
     } 
     else
         printf("server acccept the client...\n"); 
-    serverReadFunc(connfd);
+    serverReadFunc(connfd2);
     }
     pthread_exit(NULL);
 }
