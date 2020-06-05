@@ -72,11 +72,15 @@ void close_connection(){
     close(sockfd);
 }
 
+// send a packet type that is specified in the protocol
+// This function only supports packet types that do not have any additional information in the header (like the VIDEO_DATA packet)
 void send_packet_type(struct sockaddr_in* dest, char type){
     char response = type;
     send_data(dest, &response, 1);
 }
 
+// print an array
+// used for debugging
 void print_data(char* data, int len){
     for(int i = 0; i < len; i++){
         printf("%c", data[i]);
@@ -84,6 +88,7 @@ void print_data(char* data, int len){
     printf("\n");
 }
 
+// check whether a specific bit flag is set in an integer
 int is_option_set(int value, int option){
     return (value & option) == option;
 }
