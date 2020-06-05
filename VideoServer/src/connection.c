@@ -4,6 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <sys/poll.h>
 #include "connection.h"
 
 struct sockaddr_in ownAddr;
@@ -64,6 +65,39 @@ int recv_data(struct sockaddr_in* src, char* data){
         exit(1);
     }
 
+    return recv_len;
+}
+
+// the recv_data function but with a timeout as to not block execution indefinitely
+int recv_data_timeout(struct sockaddr_in* src, char* data, int timeout_ms){
+    int recv_len;
+    
+    socklen_t clientLen;
+    recv_len = -1;
+
+    clientLen = sizeof(*src);
+
+    struct pollfd fds[1];
+    fds[0].fd = sockfd;
+    fds[0].events = POLLIN;
+
+    int pollResult = poll(fds, 1, timeout_ms);
+    // pollresult
+    // > 0 something was received
+    // == 0 timed out
+    // < 0 something went wrong
+
+    if(pollResult > 0){
+        if ((recv_len = recvfrom(sockfd, data, MAX_PACKET_SIZE, 0, (struct sockaddr *) src, &clientLen)) == -1){
+            printf("recvfrom failed\n");
+        }
+    }
+    else if(pollResult < 0){
+    	printf("%s\n", "receive failed");
+    }
+
+    // -1 is timeout
+    // > 0 is length of received packet
     return recv_len;
 }
 

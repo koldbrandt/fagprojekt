@@ -21,6 +21,7 @@ enum packet_types{
 int init_server_socket(int port);
 int init_client_socket(struct sockaddr_in* serverAddr, char* serverIP, int port);
 int recv_data(struct sockaddr_in* src, char* data);
+int recv_data_timeout(struct sockaddr_in* src, char* data, int timeout_ms);
 int send_data(struct sockaddr_in* dest, char* data, int len);
 int addrMatch(struct sockaddr_in* addr1, struct sockaddr_in* addr2);
 void print_data(char* data, int len);

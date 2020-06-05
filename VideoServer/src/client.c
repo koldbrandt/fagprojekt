@@ -11,6 +11,7 @@
 #define DUMMY_DATA_LEN 11
 #define DEFAULT_SLEEP_TIME 1
 #define SLEEP_TIME_INCREMENT 10000
+#define INIT_WAIT_TIMEOUT 3000
 
 struct sockaddr_in serverAddr;
 pthread_t listenThreadId;
@@ -28,19 +29,22 @@ void run_client(char* serverIP, int serverPort, int options){
         run_test_client(serverIP, serverPort);
         return;
     }
-    //TODO: wrap in while loop so we don't have to restart if the first init fails
-    send_packet_type(&serverAddr, INIT); // send the INIT packet to the server
-    printf("sent INIT\n");
 
-    struct sockaddr_in srcAddr;
     char response[MAX_PACKET_SIZE];
+    struct sockaddr_in srcAddr;
+    do {
+        send_packet_type(&serverAddr, INIT); // send the INIT packet to the server
+        printf("sent INIT\n");
 
-    recv_data(&srcAddr, response); // wait for server response. This should be the INIT_ACK packet
-    
-    if(addrMatch(&srcAddr, &serverAddr) && response[0] == INIT_ACK){
-        // if we got the INIT_ACK packet from the server, start sending data
-        video_send_loop();
+        int status = recv_data_timeout(&srcAddr, response, INIT_WAIT_TIMEOUT); // wait for server response. This should be the INIT_ACK packet
+        if(status == -1){
+            printf("Timed out while waiting for INIT_ACK, retrying...\n");
+        }
     }
+    while(!addrMatch(&srcAddr, &serverAddr) || response[0] != INIT_ACK);
+    
+    video_send_loop();
+
     close_client();
 }
 
