@@ -16,11 +16,15 @@ int init_server_socket(int port){
         exit(1);
     }
 
+    // clear the data in the sockaddr_in struct
     memset((char *) &ownAddr, 0, sizeof(ownAddr));
+
+    // set the server to use IPv4 and listen to any incoming connections on the specified port
     ownAddr.sin_family = AF_INET;
     ownAddr.sin_addr.s_addr = INADDR_ANY;
     ownAddr.sin_port = htons(port);
 
+    // start listening
     if(bind(sockfd, (struct sockaddr*) &ownAddr, sizeof(ownAddr)) < 0)
     {
     	printf("bind\n");
@@ -36,13 +40,17 @@ int init_client_socket(struct sockaddr_in* serverAddr, char* serverIP, int port)
         exit(1);
     }
 
+    // clear the data in the sockaddr_in struct
     memset(serverAddr, 0, sizeof(*serverAddr)); 
+
+    // set the client to use IPv4 and set the server ip and port
     serverAddr->sin_family = AF_INET; 
     serverAddr->sin_addr.s_addr = inet_addr(serverIP); 
     serverAddr->sin_port = htons(port);
     return 0;
 }
 
+// received data from the socket initialized from either init_client_socket or init_server_socket
 int recv_data(struct sockaddr_in* src, char* data){
     int recv_len;
     
@@ -59,11 +67,13 @@ int recv_data(struct sockaddr_in* src, char* data){
     return recv_len;
 }
 
+// sends data to the socket initialized from either init_client_socket or init_server_socket
 int send_data(struct sockaddr_in* dest, char* data, int len){
     sendto(sockfd, data, len, 0, (struct sockaddr *) dest, sizeof(*dest));
     return 0;
 }
 
+// check if 2 addresses are the same
 int addrMatch(struct sockaddr_in* addr1, struct sockaddr_in* addr2){
     return (addr1->sin_addr.s_addr == addr2->sin_addr.s_addr) && (addr1->sin_port == addr2->sin_port);
 }

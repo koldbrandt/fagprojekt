@@ -13,10 +13,13 @@ int main(int argc, char *argv[]){
         exit(0);
     }
     
+    // set default options
     int serverPort = SERVER_PORT;
     char* serverIP = SERVER_IP;
     int clientOptions = 0;
     int serverOptions = 0;
+    
+    //check if any options are set
     for(int i = 0; i < argc; i++){
         //shared options
         if(strcmp(argv[i],"-p") == 0){
