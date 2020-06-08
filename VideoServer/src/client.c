@@ -10,8 +10,8 @@
 
 #define DUMMY_DATA_LEN 11
 #define DEFAULT_SLEEP_TIME 1
-#define SLEEP_TIME_INCREMENT 10000
-#define INIT_WAIT_TIMEOUT 3000
+#define SLEEP_TIME_INCREMENT 10000 // microseconds
+#define INIT_WAIT_TIMEOUT 3000 // milliseconds
 
 struct sockaddr_in serverAddr;
 pthread_t listenThreadId;
@@ -32,6 +32,7 @@ void run_client(char* serverIP, int serverPort, int options){
 
     char response[MAX_PACKET_SIZE];
     struct sockaddr_in srcAddr;
+    
     do {
         send_packet_type(&serverAddr, INIT); // send the INIT packet to the server
         printf("sent INIT\n");
@@ -79,19 +80,30 @@ void run_test_client(char* serverIP, int serverPort){
            "1 to send INIT \n"
            "2 to send dummy VIDEO_DATA \n"
            "3 to read and send VIDEO_DATA from FIFO to server \n"
-           "4 to run the normal client program \n"
+           "4 to run the video send loop \n"
            "5 to send TERMINATE\n";
 
     printf("%s", test_options);
 
     int choice = 0;
     while(1){
+        printf("Enter choice: ");
         scanf("%d", &choice);
 
         switch(choice){
             case 1:
                 send_packet_type(&serverAddr, INIT);
-                printf("sent INIT\n");
+                printf("sent INIT, waiting for INIT_ACK\n");
+                struct sockaddr_in srcAddr;
+                char response[MAX_PACKET_SIZE];
+                int status = recv_data_timeout(&srcAddr, response, INIT_WAIT_TIMEOUT); // wait for server response. This should be the INIT_ACK packet
+                if(status == -1){
+                    printf("Timed out while waiting for INIT_ACK\n");
+                }
+                else if (addrMatch(&srcAddr, &serverAddr) && response[0] == INIT_ACK){
+                    printf("Successfully received INIT_ACK from the server\n");
+                }
+
                 break;
             
             case 2:;
@@ -125,7 +137,6 @@ void run_test_client(char* serverIP, int serverPort){
             case 4:
                 // simply run the loop that sends VIDEO_DATA to the server.
                 // this does not do the initial handshake before sending video data
-                // this is usefull for when the server is an iperf server
                 video_send_loop();
                 break;
 

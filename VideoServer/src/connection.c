@@ -53,10 +53,8 @@ int init_client_socket(struct sockaddr_in* serverAddr, char* serverIP, int port)
 
 // received data from the socket initialized from either init_client_socket or init_server_socket
 int recv_data(struct sockaddr_in* src, char* data){
-    int recv_len;
-    
     socklen_t clientLen;
-    recv_len = -1;
+    int recv_len = -1;
 
     clientLen = sizeof(*src);
 
@@ -70,10 +68,8 @@ int recv_data(struct sockaddr_in* src, char* data){
 
 // the recv_data function but with a timeout as to not block execution indefinitely
 int recv_data_timeout(struct sockaddr_in* src, char* data, int timeout_ms){
-    int recv_len;
-    
     socklen_t clientLen;
-    recv_len = -1;
+    int recv_len = -1;
 
     clientLen = sizeof(*src);
 
@@ -96,6 +92,7 @@ int recv_data_timeout(struct sockaddr_in* src, char* data, int timeout_ms){
     	printf("%s\n", "receive failed");
     }
 
+    // recv_len
     // -1 is timeout
     // > 0 is length of received packet
     return recv_len;
