@@ -9,10 +9,6 @@
 #include "fifo.h"
 
 #define VIDEO_BUFFER_SIZE 20000000
-#define IPERF_PACKET_SIZE 8192
-
-//TODO: make this a non-global variable
-double fill_highest = 0;
 
 struct sockaddr_in clientAddr;
 int connectionStatus;
@@ -186,12 +182,16 @@ void run_server_iperf(cbuf_handle_t video_buffer, int options){
 // this receive function treats all data in the packet as video data and writes it all to the video data buffer
 void recv_video_iperf(cbuf_handle_t video_buffer){
     struct sockaddr_in recvAddr;
-    // TODO: change this to get the packet size from the recv_data function instead of hardcoding it
-    char data[IPERF_PACKET_SIZE];
-    unsigned int dataLen = IPERF_PACKET_SIZE;
+    char data[MAX_PACKET_SIZE];
+    unsigned int dataLen = 0;
+    double fill_highest = 0;
 
     while(1){
-        recv_data(&recvAddr, data); // receive the next packet from the iperf client
+        dataLen = recv_data(&recvAddr, data); // receive the next packet from the iperf client
+
+        if(dataLen <= 0){ // if we get an error when receiving or an invalid packet, skip to the next packet
+            continue;
+        }
         
         int bufferSpace = get_space(video_buffer); // get the remaining space in the video data buffer
 
