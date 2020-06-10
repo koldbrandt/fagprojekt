@@ -51,7 +51,7 @@ int init_server_socket_tcp(int port) {
 
     if(bind(sockfd, (struct sockaddr*) &ownAddr, sizeof(ownAddr)) < 0)
     {
-    	printf("bind\n");
+    	printf("bind failed\n");
         exit(1);
     }
 

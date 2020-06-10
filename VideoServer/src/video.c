@@ -67,15 +67,17 @@ void print_help(){
     printf("Server options\n");
     printf("    -p <port>: Set listen port [default: %d]\n", SERVER_PORT);
     printf("    -nf:       Don't write to fifo\n");
+    printf("    -tcp       Use tcp instead of udp\n");
     printf("    -iperf:    Ignore protocol and put all data received from the socket\n");
     printf("               into the FIFO. Used for testing with iperf client\n");
-
+    
     printf("\n");
 
     printf("Client options\n");
     printf("    -p <port>: Set destination port [default: %d]\n", SERVER_PORT);
     printf("    -ip <ip>:  Set destination ip   [default: %s]\n", SERVER_IP);
     printf("    -d:        Run in debug mode\n");
+    printf("    -tcp       Use tcp instead of udp\n");
     printf("    -iperf:    Ignore protocol and send data as fast as it is available in the FIFO.\n");
     printf("               Used when connecting to iperf server\n");
     printf("\n");

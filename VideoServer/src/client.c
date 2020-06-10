@@ -24,10 +24,12 @@ void run_client(char* serverIP, int serverPort, int options){
 
     // initialize socket
     if(is_option_set(options, CLIENT_TCP)){
+        printf("Client is using tcp\n");
         init_client_socket_tcp(&serverAddr, serverIP, serverPort);
         run_client_tcp(serverIP, serverPort, options);
     }
     else{
+        printf("Client is using udp\n");
         init_client_socket_udp(&serverAddr, serverIP, serverPort);
     }
 
