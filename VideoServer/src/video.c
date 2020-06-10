@@ -25,6 +25,11 @@ int main(int argc, char *argv[]){
         if(strcmp(argv[i],"-p") == 0){
             serverPort = atoi(argv[i + 1]);
         }
+
+        if(strcmp(argv[i],"-tcp") == 0){
+            clientOptions = clientOptions | CLIENT_TCP;
+            serverOptions = serverOptions | SERVER_TCP;
+        }
         
         //client options
         if(strcmp(argv[i],"-ip") == 0){

@@ -8,11 +8,10 @@
 #include "connection.h"
 #include "fifo.h"
 
-#define VIDEO_BUFFER_SIZE 20000000
-
 struct sockaddr_in clientAddr;
 int connectionStatus;
 pthread_t fifoWriteThreadId;
+cbuf_handle_t video_buffer;
 
 enum connection_status{
     WAITING_INIT,
@@ -20,21 +19,32 @@ enum connection_status{
 };
 
 void run_server(int serverPort, int options){
-    init_server_socket_udp(serverPort);
+ 
     // create buffer for received video data
-    cbuf_handle_t video_buffer = init_buffer(VIDEO_BUFFER_SIZE);
+    video_buffer = init_buffer(VIDEO_BUFFER_SIZE);
     
     //Open physical memory to allow for read/write to/from the fifo
 	open_physical_memory_device();
     mmap_fpga_peripherals();
 
-    printf("Starting in server mode on port %d\n", serverPort);
-    
     if(!is_option_set(options, NO_FIFO)){
         // start the thread that reads from the video data buffer and writes to the fifo, unless the -nf option is specified
         printf("creating fifo write thread\n");
         pthread_create(&fifoWriteThreadId, NULL, &fifo_write_thread, video_buffer);
     }
+
+    printf("Starting in server mode on port %d\n", serverPort);
+
+    if(is_option_set(options, SERVER_TCP)){
+        init_server_socket_tcp(serverPort);
+        run_server_tcp(video_buffer, options);
+        close_server();
+        return;
+    }
+    else{
+        init_server_socket_udp(serverPort);
+    }
+    
     if(is_option_set(options, SERVER_RUN_IPERF)){
         // run the server that expects an iperf client, and exit afterwards
         // this is the path for the -iperf option
@@ -42,6 +52,7 @@ void run_server(int serverPort, int options){
         run_server_iperf(video_buffer, options);
         return;
     }
+    
     
     connectionStatus = WAITING_INIT;
 	
@@ -57,12 +68,7 @@ void run_server(int serverPort, int options){
                 break;
         }
     }
-    close_connection();
-	pthread_join(fifoWriteThreadId, NULL);
-    free_buffer(video_buffer);
-	//close physical memory
-	munmap_fpga_peripherals();
-    close_physical_memory_device();
+    close_server();
 }
 
 // function for the state where we are waiting for an INIT packet from a client
@@ -118,20 +124,23 @@ void recv_video(cbuf_handle_t video_buffer){
         if(addrMatch(&recvAddr, &clientAddr)){ // make sure the packet is from the client we are currently connected to
             // this check is only needed because we use UDP, as this allows for any client to send any kind of data at any time
             // we probably don't need this check when the program is running in the full system as there should only ever be one client sending any data to the server
+            send_packet_buffer(&data[3], dataLen, video_buffer);
             
-            int bufferSpace = get_space(video_buffer); // get the remaining space left in the video data buffer
-            
-            if(bufferSpace >= dataLen){ // if we have enough room in the buffer, put the received data in the buffer
-                // start at data[3] as we do not want the header information to be written to the video data buffer
-                send_data_buffer(&data[3], dataLen, video_buffer);
-            }
-            else{
-                send_packet_type(&clientAddr, SEND_SLOW); // otherwise skip the data and send a SEND_SLOW packet to the client
-            }
         }
         else { // if the packet is from a new client, try to terminate the connection to the new client
             send_packet_type(&clientAddr, TERMINATE);
         }
+    }
+}
+
+void send_packet_buffer(char* data, int dataLen, cbuf_handle_t video_buffer){
+    int bufferSpace = get_space(video_buffer); // get the remaining space left in the video data buffer
+    if(bufferSpace >= dataLen){ // if we have enough room in the buffer, put the received data in the buffer
+        // start at data[3] as we do not want the header information to be written to the video data buffer
+        send_data_buffer(data, dataLen, video_buffer);
+    }
+    else{
+        send_packet_type(&clientAddr, SEND_SLOW); // otherwise skip the data and send a SEND_SLOW packet to the client
     }
 }
 
@@ -171,12 +180,7 @@ void run_server_iperf(cbuf_handle_t video_buffer, int options){
 	
     recv_video_iperf(video_buffer);
 
-    close_connection();
-	pthread_join(fifoWriteThreadId, NULL);
-    free_buffer(video_buffer);
-	//close physical memory
-	munmap_fpga_peripherals();
-    close_physical_memory_device();
+    close_server();
 }
 
 // the video receive function for the performance test server
@@ -212,4 +216,13 @@ void recv_video_iperf(cbuf_handle_t video_buffer){
             printf("buffer is full\n");
         }
     }
+}
+
+void close_server(){
+    close_connection();
+	pthread_join(fifoWriteThreadId, NULL);
+    free_buffer(video_buffer);
+	//close physical memory
+	munmap_fpga_peripherals();
+    close_physical_memory_device();
 }

@@ -18,17 +18,25 @@ enum packet_types{
     SEND_FAST = 6
 };
 
-int init_server_socket_udp(int port);
-int init_server_socket_tcp(int port);
-int init_client_socket_udp(struct sockaddr_in* serverAddr, char* serverIP, int port);
-int init_client_socket_tcp(struct sockaddr_in* serverAddr, char* serverIP, int port);
-int recv_data(struct sockaddr_in* src, char* data);
-int recv_data_timeout(struct sockaddr_in* src, char* data, int timeout_ms);
-int send_data(struct sockaddr_in* dest, char* data, int len);
 int addrMatch(struct sockaddr_in* addr1, struct sockaddr_in* addr2);
 void print_data(char* data, int len);
-void send_packet_type(struct sockaddr_in* dest, char type);
 int is_option_set(int value, int option);
 void close_connection();
+int recv_data_timeout(struct sockaddr_in* src, char* data, int timeout_ms);
+
+int init_server_socket_udp(int port);
+int init_server_socket_tcp(int port);
+
+int init_client_socket_udp(struct sockaddr_in* serverAddr, char* serverIP, int port);
+int init_client_socket_tcp(struct sockaddr_in* serverAddr, char* serverIP, int port);
+
+int recv_data(struct sockaddr_in* src, char* data);
+int recv_data_tcp(char* data, int len);
+
+int send_data(struct sockaddr_in* dest, char* data, int len);
+int send_data_tcp(char* data, int len);
+
+void send_packet_type(struct sockaddr_in* dest, char type);
+void send_packet_type_tcp(char type);
 
 #endif // CONNECTION_H
