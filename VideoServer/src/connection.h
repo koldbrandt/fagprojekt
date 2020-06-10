@@ -18,8 +18,10 @@ enum packet_types{
     SEND_FAST = 6
 };
 
-int init_server_socket(int port);
-int init_client_socket(struct sockaddr_in* serverAddr, char* serverIP, int port);
+int init_server_socket_udp(int port);
+int init_server_socket_tcp(int port);
+int init_client_socket_udp(struct sockaddr_in* serverAddr, char* serverIP, int port);
+int init_client_socket_tcp(struct sockaddr_in* serverAddr, char* serverIP, int port);
 int recv_data(struct sockaddr_in* src, char* data);
 int recv_data_timeout(struct sockaddr_in* src, char* data, int timeout_ms);
 int send_data(struct sockaddr_in* dest, char* data, int len);

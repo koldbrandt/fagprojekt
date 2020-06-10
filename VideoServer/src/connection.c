@@ -10,8 +10,32 @@
 struct sockaddr_in ownAddr;
 int sockfd;
 
-int init_server_socket(int port){
-    
+int protocol;
+
+int init_server_socket_udp(int port) {
+    if((sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
+    	printf("sock\n");
+        exit(1);
+    }
+
+    // clear the data in the sockaddr_in struct
+    memset((char *) &ownAddr, 0, sizeof(ownAddr));
+
+    // set the server to use IPv4 and listen to any incoming connections on the specified port
+    ownAddr.sin_family = AF_INET;
+    ownAddr.sin_addr.s_addr = INADDR_ANY;
+    ownAddr.sin_port = htons(port);
+
+    // start listening
+    if(bind(sockfd, (struct sockaddr*) &ownAddr, sizeof(ownAddr)) < 0)
+    {
+    	printf("bind\n");
+        exit(1);
+    }
+    return 0;
+}
+
+int init_server_socket_tcp(int port) {
     if((sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
     	printf("sock\n");
         exit(1);
@@ -35,7 +59,7 @@ int init_server_socket(int port){
 }
 
 
-int init_client_socket(struct sockaddr_in* serverAddr, char* serverIP, int port){
+int init_client_socket_udp(struct sockaddr_in* serverAddr, char* serverIP, int port){
     if((sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
     	printf("sock\n");
         exit(1);
@@ -48,6 +72,30 @@ int init_client_socket(struct sockaddr_in* serverAddr, char* serverIP, int port)
     serverAddr->sin_family = AF_INET; 
     serverAddr->sin_addr.s_addr = inet_addr(serverIP); 
     serverAddr->sin_port = htons(port);
+    return 0;
+}
+
+int init_client_socket_tcp(struct sockaddr_in* serverAddr, char* serverIP, int port){
+    if((sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1){
+    	printf("sock\n");
+        exit(1);
+    }
+
+    // clear the data in the sockaddr_in struct
+    memset(serverAddr, 0, sizeof(*serverAddr)); 
+
+    // set the client to use IPv4 and set the server ip and port
+    serverAddr->sin_family = AF_INET; 
+    serverAddr->sin_addr.s_addr = inet_addr(serverIP); 
+    serverAddr->sin_port = htons(port);
+
+    if (connect(sockfd, (struct sockaddr*) serverAddr, sizeof(*serverAddr)) != 0) { 
+        printf("connection with the server failed...\n"); 
+        exit(1); 
+    } 
+    else
+        printf("connected to the server..\n"); 
+
     return 0;
 }
 

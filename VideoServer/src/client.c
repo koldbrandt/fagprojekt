@@ -18,8 +18,18 @@ pthread_t listenThreadId;
 int sleepTime; // used for adjusting send rate
 
 void run_client(char* serverIP, int serverPort, int options){
-    // initialize the socket and memory
-    init_client(serverIP, serverPort);
+    // initialize socket
+    if(is_option_set(options, PROTOCOL_TCP)){
+        init_client_socket_tcp(&serverAddr, serverIP, serverPort);
+    }
+    else{
+        init_client_socket_udp(&serverAddr, serverIP, serverPort);
+    }
+
+    // map memory so we can read/write from/to the fifo
+    open_physical_memory_device();
+    mmap_fpga_peripherals();
+    
     sleepTime = DEFAULT_SLEEP_TIME;
     printf("Starting in client mode\n");
     printf("Connecting to %s on port %d\n", serverIP, serverPort);
@@ -186,11 +196,7 @@ void* client_listen_thread(){
 }
 
 void init_client(char* serverIP, int serverPort){
-    // initialize socket
-    init_client_socket(&serverAddr, serverIP, serverPort);
-    // map memory so we can read/write from/to the fifo
-    open_physical_memory_device();
-    mmap_fpga_peripherals();
+    
 }
 
 void close_client(){

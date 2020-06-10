@@ -27,6 +27,14 @@ void send_data_buffer(char* data, int dataLen, cbuf_handle_t buf){
 
 // read and remove data from the buffer
 // this function works much like the send_data_buffer, except it reads instead of writes
+void read_data_buffer(char* data, cbuf_handle_t buf){
+    *data = (buf->buffer[buf->tail]);
+    buf->tail = (buf->tail + 1) % buf->max;
+    buf->full = 0;
+}
+
+/* old read_data_buffer where you can read multiple bytes at a time
+   this is not needed is our case at the moment
 void read_data_buffer(char* data, int amount, cbuf_handle_t buf){
     if(buf->tail + amount > buf->max){
         int split = buf->max - buf->tail;
@@ -39,6 +47,7 @@ void read_data_buffer(char* data, int amount, cbuf_handle_t buf){
         buf->full = 0;
     }
 }
+*/
 
 // get the remaining empty space left in the buffer
 int get_space(cbuf_handle_t buf){

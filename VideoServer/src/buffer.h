@@ -14,7 +14,7 @@ struct circular_buf_t {
 	int full;
     pthread_mutex_t lock;
 };
-void read_data_buffer(char* data, int amount, cbuf_handle_t buf);
+void read_data_buffer(char* data, cbuf_handle_t buf);
 void send_data_buffer(char* data, int dataLen, cbuf_handle_t buf);
 int get_space(cbuf_handle_t buf);
 cbuf_handle_t init_buffer(size_t size);

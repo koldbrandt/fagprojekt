@@ -3,6 +3,7 @@
 
 enum client_options{
     RUN_DEBUG = 1,
+    PROTOCOL_TCP = 2,
 };
 
 void run_client(char* serverIP, int serverPort, int options);

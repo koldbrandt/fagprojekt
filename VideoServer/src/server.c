@@ -20,7 +20,7 @@ enum connection_status{
 };
 
 void run_server(int serverPort, int options){
-    init_server_socket(serverPort);
+    init_server_socket_udp(serverPort);
     // create buffer for received video data
     cbuf_handle_t video_buffer = init_buffer(VIDEO_BUFFER_SIZE);
     
@@ -138,7 +138,7 @@ void recv_video(cbuf_handle_t video_buffer){
 // this is the function that runs in the second thread and reads the data from the video data buffer and writes it to the fifo
 // the buffer is passed as a void pointer as that seemed to be the only way to pass an argument to another thread
 void* fifo_write_thread(void* buffer){
-    char readData[1];
+    char readData;
     cbuf_handle_t video_buffer = (cbuf_handle_t) buffer; // cast the void pointer to a pointer to the buffer
     int sendStatus = 0;
 
@@ -146,14 +146,15 @@ void* fifo_write_thread(void* buffer){
     while(1){
         if(!buffer_is_empty(video_buffer)){
             // if the buffer is not empty, read one byte from it
-            read_data_buffer(readData, 1, video_buffer);
+            read_data_buffer(&readData, video_buffer);
             // send status indicates whether the data was written to the fifo successfully
             // this can fail if the fifo is full 
-            sendStatus = send_data_fifo(readData[0]); 
+            printf("123 %c\n", readData);
+            sendStatus = send_data_fifo(readData); 
             // keep trying to write the data to the fifo until it succeeds
             while(sendStatus == 1){
                 usleep(1); //wait for fifo to not be full
-                sendStatus = send_data_fifo(readData[0]);
+                sendStatus = send_data_fifo(readData);
             }
         }
         else{
