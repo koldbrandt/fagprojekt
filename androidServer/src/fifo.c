@@ -20,7 +20,7 @@
 
 #define alt_write_word(dest, src)       (*ALT_CAST(volatile uint32_t *, (dest)) = (src))
 
-volatile unsigned char * fifo_CONTROL_receive_ptr = NULL ;
+volatile unsigned long int * fifo_CONTROL_receive_ptr = NULL ;
 volatile unsigned int  * fifo_CONTROL_rxstatus_ptr = NULL ;
 volatile unsigned char * fifo_CONTROL_transmit_ptr = NULL ;
 volatile unsigned int  * fifo_CONTROL_txstatus_ptr = NULL ;
@@ -60,7 +60,7 @@ void mmap_fpga_peripherals() {
         close(fd_dev_mem);
         exit(EXIT_FAILURE);
     }
-	fifo_CONTROL_transmit_ptr = (unsigned char *) (h2f_axi_master + FIFO_CONTROL_TX_IN_BASE);
+	fifo_CONTROL_transmit_ptr = (unsigned long int *) (h2f_axi_master + FIFO_CONTROL_TX_IN_BASE);
 	fifo_CONTROL_txstatus_ptr = (unsigned int *)(h2f_lw_axi_master +  FIFO_CONTROL_TX_IN_CSR_BASE);
 	fifo_CONTROL_receive_ptr = (unsigned char *) (h2f_axi_master + FIFO_CONTROL_RX_OUT_BASE);
 	fifo_CONTROL_rxstatus_ptr = (unsigned int *)(h2f_lw_axi_master +  FIFO_CONTROL_RX_OUT_CSR_BASE);
@@ -95,7 +95,7 @@ int send_data_fifo(char data){
 	return 1;
 }
 
-int read_data_fifo(char* dataPtr){
+int read_data_fifo(long int* dataPtr){
 	if (!FIFO_CONTROL_RX_EMPTY){
         *dataPtr = *fifo_CONTROL_receive_ptr;
         return 0;
