@@ -13,7 +13,7 @@ int connectionStatus;
 pthread_t fifoWriteThreadId;
 cbuf_handle_t video_buffer;
 
-#define BUFFER_PRINT_INTERVAL 250
+#define BUFFER_PRINT_INTERVAL 250 //print buffer status every 250 packets
 
 enum connection_status{
     WAITING_INIT,
@@ -98,9 +98,7 @@ void recv_video(cbuf_handle_t video_buffer){
     while(1){
         recvLen = recv_data(&recvAddr, data);
 
-        if(recvLen < 3){
-            // if the length of the packet is less than 3, it cannot be a VIDEO_DATA packet
-            // in that case simply skip to the next packet
+        if(recvLen <= 0){
             continue;
         }
 
@@ -108,7 +106,11 @@ void recv_video(cbuf_handle_t video_buffer){
             print_buffer_fill_level(video_buffer);
             pack_num = 0;
         }
-        
+
+        send_packet_buffer(&data[0], recvLen, video_buffer);
+        pack_num += 1;
+
+        /* commented out until the video group fixes their init protocol
         if(addrMatch(&recvAddr, &clientAddr)){ // make sure the packet is from the client we are currently connected to
             // this check is only needed because we use UDP, as this allows for any client to send any kind of data at any time
             // we probably don't need this check when the program is running in the full system as there should only ever be one client sending any data to the server
@@ -118,7 +120,7 @@ void recv_video(cbuf_handle_t video_buffer){
         }
         else { // if the packet is from a new client, try to terminate the connection to the new client
             send_packet_type(&clientAddr, TERMINATE);
-        }
+        }*/
     }
 }
 
@@ -126,8 +128,8 @@ void send_packet_buffer(char* data, unsigned short dataLen, cbuf_handle_t video_
     int bufferSpace = get_space(video_buffer); // get the remaining space left in the video data buffer
     if(bufferSpace >= dataLen){ // if we have enough room in the buffer, put the received data in the buffer
         char len_header[2];
-        memcpy(&len_header, &dataLen, 2);
-        send_data_buffer(len_header, 2, video_buffer);
+        memcpy(&len_header[0], &dataLen, 2);
+        send_data_buffer(&len_header[0], 2, video_buffer);
         send_data_buffer(data, dataLen, video_buffer);
     }
     else{
@@ -167,42 +169,8 @@ void* fifo_write_thread(void* buffer){
 void run_server_iperf(cbuf_handle_t video_buffer, int options){
     printf("Running in iperf test mode\n");
     connectionStatus = RECV_VIDEO;
-	
-    recv_video_iperf(video_buffer);
-
+    recv_video(video_buffer);
     close_server();
-}
-
-// the video receive function for the performance test server
-// this receive function treats all data in the packet as video data and writes it all to the video data buffer
-void recv_video_iperf(cbuf_handle_t video_buffer){
-    struct sockaddr_in recvAddr;
-    char data[MAX_PACKET_SIZE];
-    unsigned short dataLen = 0;
-    int pack_num = 0;
-
-    while(1){
-        dataLen = recv_data(&recvAddr, data); // receive the next packet from the iperf client
-
-        if(dataLen <= 0){ // if we get an error when receiving or an invalid packet, skip to the next packet
-            continue;
-        }
-        
-        int bufferSpace = get_space(video_buffer); // get the remaining space in the video data buffer
-
-        pack_num += 1;
-        if(pack_num >= BUFFER_PRINT_INTERVAL){
-            print_buffer_fill_level(video_buffer);
-            pack_num = 0;
-        }
-
-        if(bufferSpace >= dataLen){ // if we have enough room in the buffer, put the received data in the buffer
-            send_packet_buffer(data, dataLen, video_buffer); // send the entire packet to the video data buffer
-        }
-        else{
-            printf("buffer is full\n");
-        }
-    }
 }
 
 void print_buffer_fill_level(cbuf_handle_t video_buffer){

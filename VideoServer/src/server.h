@@ -27,7 +27,6 @@ void run_server_tcp(cbuf_handle_t video_buffer, int options);
 void run_server_iperf(cbuf_handle_t video_buffer, int options);
 void run_server_iperf_tcp(cbuf_handle_t video_buffer, int options);
 
-void recv_video_iperf(cbuf_handle_t buf);
 void recv_video_iperf_tcp(cbuf_handle_t video_buffer);
 
 #endif // SERVER_H

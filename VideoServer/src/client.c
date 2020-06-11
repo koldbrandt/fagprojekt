@@ -11,14 +11,12 @@
 
 struct sockaddr_in serverAddr;
 pthread_t listenThreadId;
-int sleepTime; // used for adjusting send rate
 
 void run_client(char* serverIP, int serverPort, int options){
     // map memory so we can read/write from/to the fifo
     open_physical_memory_device();
     mmap_fpga_peripherals();
     
-    sleepTime = DEFAULT_SLEEP_TIME;
     printf("Starting in client mode\n");
     printf("Connecting to %s on port %d\n", serverIP, serverPort);
 
@@ -60,29 +58,18 @@ void run_client(char* serverIP, int serverPort, int options){
 
 void video_send_loop(){
     printf("starting video loop\n");
-    pthread_create(&listenThreadId, NULL, &client_listen_thread, NULL); // create the thread that listens for SEND_FAST/SLOW packets from the server
-    int returnValue = 0;
+    //pthread_create(&listenThreadId, NULL, &client_listen_thread, NULL); // create the thread that listens for SEND_FAST/SLOW packets from the server
+    unsigned short packet_len = 0;
+    int currentSize = 0;
+    char dataBuffer[MAX_PACKET_SIZE];
+    char pack_len[2];
+
     while(1){
-        int currentSize = 0;
-        char dataBuffer[MAX_PACKET_SIZE];
-        char pack_len[2];
-
-        char status = -1;
+        currentSize = 0;
         
-        status = read_data_fifo(&pack_len[0]);
-        while(status != 0){
-            usleep(1);
-            status = read_data_fifo(&pack_len[0]);
-        }
-
-        status = -1;
-        status = read_data_fifo(&pack_len[1]);
-        while(status != 0){
-            usleep(1);
-            status = read_data_fifo(&pack_len[1]);
-        }
+        read_fifo_blocking(&pack_len[0]);
+        read_fifo_blocking(&pack_len[1]);
         
-        unsigned short packet_len = 0;
         memcpy(&packet_len, &pack_len[0], 2);
         if(packet_len > MAX_PACKET_SIZE){
             printf("invalid packet len %d\n", packet_len);
@@ -90,17 +77,11 @@ void video_send_loop(){
         }
         // read data from the fifo and put it into the buffer until the buffer contains the maximum allowed data in a VIDEO_DATA packet
         while (currentSize < packet_len){
-            returnValue = read_data_fifo(&dataBuffer[currentSize]); // try to read one byte from the fifo
-            if(returnValue == 0){ // if we read the data successfully, increment the current packet size by one
-                currentSize += 1;
-            }
-            else{ // otherwise the fifo must be empty, so we sleep to allow it to fill up again
-                usleep(1);
-            }
+            read_fifo_blocking(&dataBuffer[currentSize]);
+            currentSize += 1;
         }
         // when the buffer is full, send the VIDEO_DATA packet
         send_video_packet(dataBuffer, currentSize);
-        usleep(sleepTime); //sleep to reduce send rate
     }
 }
 
@@ -114,7 +95,7 @@ void run_test_client(char* serverIP, int serverPort){
            "3 to read and send VIDEO_DATA from FIFO to server \n"
            "4 to run the video send loop \n"
            "5 to send TERMINATE\n"
-           "6 to empty FIFO";
+           "6 to empty FIFO\n";
 
     printf("%s", test_options);
 
@@ -183,7 +164,7 @@ void run_test_client(char* serverIP, int serverPort){
             case 6:;
                 char temp = 0;
                 char dataHolder = 0;
-
+                temp = read_data_fifo(&dataHolder);
                 while(temp == 0){
                     temp = read_data_fifo(&dataHolder);
                     printf("read from fifo %c\n", dataHolder);
@@ -196,9 +177,18 @@ void run_test_client(char* serverIP, int serverPort){
 }
 
 void send_video_packet(char* data, short len){
-    send_data(&serverAddr, data, len); // send the VIDEO_DATA packet
+    send_data(&serverAddr, data, len);
 }
 
+void read_fifo_blocking(char* data){
+    int status = -1;
+    status = read_data_fifo(data);
+    while(status != 0){
+        usleep(1);
+        status = read_data_fifo(data);
+    }
+}
+/*
 // this function runs in the second thread on the client, and adjusts the time to sleep between packets to adjust the send rate to the server
 void* client_listen_thread(){
     printf("started flow control thread\n");
@@ -217,11 +207,11 @@ void* client_listen_thread(){
             sleepTime = 1;
         }
     }
-}
+}*/
 
 void close_client(pthread_t listenThreadID){
     close_connection();
-    pthread_join(listenThreadID, NULL);
+    //pthread_join(listenThreadID, NULL);
     munmap_fpga_peripherals();
     close_physical_memory_device();
 }

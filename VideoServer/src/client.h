@@ -14,6 +14,7 @@ enum client_options{
 
 void init_client(char* serverIP, int serverPort);
 void close_client(pthread_t listenThreadID);
+void read_fifo_blocking(char* data);
 
 void send_video_packet(char* data, short len);
 void send_video_packet_tcp(char* data, short len);
