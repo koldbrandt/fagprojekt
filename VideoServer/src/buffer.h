@@ -12,7 +12,6 @@ struct circular_buf_t {
 	size_t tail;
 	size_t max; //of the buffer
 	int full;
-    pthread_mutex_t lock;
 };
 void read_data_buffer(char* data, cbuf_handle_t buf);
 void send_data_buffer(char* data, int dataLen, cbuf_handle_t buf);

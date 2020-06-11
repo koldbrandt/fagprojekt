@@ -25,8 +25,7 @@ void send_data_buffer(char* data, int dataLen, cbuf_handle_t buf){
     }
 }
 
-// read and remove data from the buffer
-// this function works much like the send_data_buffer, except it reads instead of writes
+// read and removes data from the buffer
 void read_data_buffer(char* data, cbuf_handle_t buf){
     *data = (buf->buffer[buf->tail]);
     buf->tail = (buf->tail + 1) % buf->max;
@@ -92,12 +91,6 @@ cbuf_handle_t init_buffer(size_t size){
     cbuf->tail = 0;
     cbuf->full = 0;
     cbuf->max = size;
-    // also create a lock for multithreading
-    // this lock is not used at the moment
-    if (pthread_mutex_init(&(cbuf->lock), NULL) != 0)
-    {
-        printf("\n mutex init failed\n");
-    }
     return cbuf;
 }
 

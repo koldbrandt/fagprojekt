@@ -91,19 +91,11 @@ void wait_init(struct sockaddr_in* client){
 void recv_video(cbuf_handle_t video_buffer){
     struct sockaddr_in recvAddr;
     char data[MAX_PACKET_SIZE];
-    int recvLen = 0;
+    unsigned short recvLen = 0;
 
     // video receive loop
     while(1){
         recvLen = recv_data(&recvAddr, data);
-        
-        int type = data[0];
-
-        if(type == TERMINATE){
-            printf("received TERMINATE, waiting for new client\n");
-            connectionStatus = WAITING_INIT;
-            break;
-        }
 
         if(recvLen < 3){
             // if the length of the packet is less than 3, it cannot be a VIDEO_DATA packet
@@ -111,22 +103,10 @@ void recv_video(cbuf_handle_t video_buffer){
             continue;
         }
         
-        // put the length of the from the VIDEO_DATA header into the dataLen variable
-        unsigned short len = 0;
-        memcpy(&len, &data[1], 2);
-        unsigned int dataLen = (unsigned int) len;
-
-        if(dataLen <= 0 || type != VIDEO_DATA){
-            // again if the packet is the wrong type we skip it
-            // this is for the case where the length is larger or equal to 3, but still has the wrong packet type in the header
-            // or an invalid length in the VIDEO_DATA header
-            continue;
-        }
-        
         if(addrMatch(&recvAddr, &clientAddr)){ // make sure the packet is from the client we are currently connected to
             // this check is only needed because we use UDP, as this allows for any client to send any kind of data at any time
             // we probably don't need this check when the program is running in the full system as there should only ever be one client sending any data to the server
-            send_packet_buffer(&data[3], dataLen, video_buffer);
+            send_packet_buffer(&data[0], recvLen, video_buffer);
             
         }
         else { // if the packet is from a new client, try to terminate the connection to the new client
@@ -135,10 +115,13 @@ void recv_video(cbuf_handle_t video_buffer){
     }
 }
 
-void send_packet_buffer(char* data, int dataLen, cbuf_handle_t video_buffer){
+void send_packet_buffer(char* data, unsigned short dataLen, cbuf_handle_t video_buffer){
     int bufferSpace = get_space(video_buffer); // get the remaining space left in the video data buffer
     if(bufferSpace >= dataLen){ // if we have enough room in the buffer, put the received data in the buffer
-        // start at data[3] as we do not want the header information to be written to the video data buffer
+        char len_header[2];
+        memcpy(&len_header, &dataLen, 2);
+        send_data_buffer(len_header, 2, video_buffer);
+        printf("sent length %d", dataLen);
         send_data_buffer(data, dataLen, video_buffer);
     }
     else{
@@ -160,7 +143,6 @@ void* fifo_write_thread(void* buffer){
             read_data_buffer(&readData, video_buffer);
             // send status indicates whether the data was written to the fifo successfully
             // this can fail if the fifo is full 
-            printf("123 %c\n", readData);
             sendStatus = send_data_fifo(readData); 
             // keep trying to write the data to the fifo until it succeeds
             while(sendStatus == 1){
@@ -190,7 +172,7 @@ void run_server_iperf(cbuf_handle_t video_buffer, int options){
 void recv_video_iperf(cbuf_handle_t video_buffer){
     struct sockaddr_in recvAddr;
     char data[MAX_PACKET_SIZE];
-    unsigned int dataLen = 0;
+    unsigned short dataLen = 0;
     double fill_highest = 0;
 
     while(1){
@@ -212,7 +194,7 @@ void recv_video_iperf(cbuf_handle_t video_buffer){
             fill_highest = percent;
         }
         if(bufferSpace >= dataLen){ // if we have enough room in the buffer, put the received data in the buffer
-            send_data_buffer(data, dataLen, video_buffer); // send the entire packet to the video data buffer
+            send_packet_buffer(data, dataLen, video_buffer); // send the entire packet to the video data buffer
         }
         else{
             printf("buffer is full\n");

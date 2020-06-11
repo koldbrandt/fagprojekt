@@ -14,7 +14,7 @@ enum server_options{
 
 void wait_init(struct sockaddr_in* addr);
 void* fifo_write_thread(void* buffer);
-void send_packet_buffer(char* data, int dataLen, cbuf_handle_t video_buffer);
+void send_packet_buffer(char* data, unsigned short dataLen, cbuf_handle_t video_buffer);
 void close_server();
 
 void recv_video(cbuf_handle_t buf);

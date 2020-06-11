@@ -61,12 +61,19 @@ void run_client(char* serverIP, int serverPort, int options){
 void video_send_loop(){
     printf("starting video loop\n");
     pthread_create(&listenThreadId, NULL, &client_listen_thread, NULL); // create the thread that listens for SEND_FAST/SLOW packets from the server
+    int returnValue = 0;
     while(1){
         int currentSize = 0;
         char dataBuffer[MAX_PACKET_SIZE];
-        int returnValue = 0;
+        char pack_len[2];
+        read_data_fifo(&pack_len[0]);
+        read_data_fifo(&pack_len[1]);
+
+        unsigned short packet_len = 0;
+        memcpy(&packet_len, &pack_len[0], 2);
+        printf("received len %d", packet_len);
         // read data from the fifo and put it into the buffer until the buffer contains the maximum allowed data in a VIDEO_DATA packet
-        while (currentSize < MAX_PACKET_SIZE - VIDEO_HEADER_LENGTH){
+        while (currentSize < packet_len){
             returnValue = read_data_fifo(&dataBuffer[currentSize]); // try to read one byte from the fifo
             if(returnValue == 0){ // if we read the data successfully, increment the current packet size by one
                 currentSize += 1;
@@ -162,16 +169,7 @@ void run_test_client(char* serverIP, int serverPort){
 }
 
 void send_video_packet(char* data, short len){
-    int length = VIDEO_HEADER_LENGTH + len; // get the length of the packet by adding the VIDEO_DATA header length to the data length
-    char* packet = malloc(length * sizeof(char));
-
-    // put the headers and data in the correct place in the packet
-    packet[0] = VIDEO_DATA;
-    memcpy(&packet[1], &len, 2);
-    memcpy(&packet[3], data, len);
-
-    send_data(&serverAddr, packet, length); // send the VIDEO_DATA packet
-    free(packet);
+    send_data(&serverAddr, data, len); // send the VIDEO_DATA packet
 }
 
 // this function runs in the second thread on the client, and adjusts the time to sleep between packets to adjust the send rate to the server
