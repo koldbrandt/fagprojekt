@@ -66,16 +66,20 @@ void video_send_loop(){
         int currentSize = 0;
         char dataBuffer[MAX_PACKET_SIZE];
         char pack_len[2];
+
         char status = -1;
+        
+        status = read_data_fifo(&pack_len[0]);
         while(status != 0){
+            usleep(1);
             status = read_data_fifo(&pack_len[0]);
-            usleep(5);
         }
 
         status = -1;
+        status = read_data_fifo(&pack_len[1]);
         while(status != 0){
+            usleep(1);
             status = read_data_fifo(&pack_len[1]);
-            usleep(5);
         }
         
         unsigned short packet_len = 0;

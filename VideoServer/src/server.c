@@ -13,7 +13,7 @@ int connectionStatus;
 pthread_t fifoWriteThreadId;
 cbuf_handle_t video_buffer;
 
-#define BUFFER_PRINT_INTERVAL 100
+#define BUFFER_PRINT_INTERVAL 250
 
 enum connection_status{
     WAITING_INIT,
