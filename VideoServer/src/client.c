@@ -72,6 +72,10 @@ void video_send_loop(){
         unsigned short packet_len = 0;
         memcpy(&packet_len, &pack_len[0], 2);
         printf("received len %d\n", packet_len);
+        if(packet_len > MAX_PACKET_SIZE){
+            printf("invalid packet len %d", packet_len);
+            continue;
+        }
         // read data from the fifo and put it into the buffer until the buffer contains the maximum allowed data in a VIDEO_DATA packet
         while (currentSize < packet_len){
             returnValue = read_data_fifo(&dataBuffer[currentSize]); // try to read one byte from the fifo
@@ -97,7 +101,8 @@ void run_test_client(char* serverIP, int serverPort){
            "2 to send dummy VIDEO_DATA \n"
            "3 to read and send VIDEO_DATA from FIFO to server \n"
            "4 to run the video send loop \n"
-           "5 to send TERMINATE\n";
+           "5 to send TERMINATE\n"
+           "6 to empty FIFO";
 
     printf("%s", test_options);
 
@@ -163,6 +168,15 @@ void run_test_client(char* serverIP, int serverPort){
                 close_connection();
                 exit(0);
                 break;
+            case 6:;
+                char temp = -1;
+
+                while(temp == 0){
+                    temp = read_data_fifo(&temp);
+                }
+
+                printf("fifo should be empty\n");
+
         }
     }
     close_client(listenThreadId);
