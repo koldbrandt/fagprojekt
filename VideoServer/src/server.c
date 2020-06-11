@@ -13,6 +13,8 @@ int connectionStatus;
 pthread_t fifoWriteThreadId;
 cbuf_handle_t video_buffer;
 
+#define BUFFER_PRINT_INTERVAL 100
+
 enum connection_status{
     WAITING_INIT,
     RECV_VIDEO
@@ -55,7 +57,6 @@ void run_server(int serverPort, int options){
         return;
     }
     
-    
     connectionStatus = WAITING_INIT;
 	
     // simple state machine for whether we are waiting for a client connection or currently receiving data from a client
@@ -92,7 +93,7 @@ void recv_video(cbuf_handle_t video_buffer){
     struct sockaddr_in recvAddr;
     char data[MAX_PACKET_SIZE];
     unsigned short recvLen = 0;
-
+    int pack_num = 0;
     // video receive loop
     while(1){
         recvLen = recv_data(&recvAddr, data);
@@ -102,11 +103,20 @@ void recv_video(cbuf_handle_t video_buffer){
             // in that case simply skip to the next packet
             continue;
         }
+
+        if(pack_num >= BUFFER_PRINT_INTERVAL){
+            double used = (double) fill_level(video_buffer);
+            double percent = (used / VIDEO_BUFFER_SIZE) * 100;
+            int floorPercent = (int) percent;
+            printf("Current buffer fill is %d", floorPercent);
+            pack_num = 0;
+        }
         
         if(addrMatch(&recvAddr, &clientAddr)){ // make sure the packet is from the client we are currently connected to
             // this check is only needed because we use UDP, as this allows for any client to send any kind of data at any time
             // we probably don't need this check when the program is running in the full system as there should only ever be one client sending any data to the server
             send_packet_buffer(&data[0], recvLen, video_buffer);
+            pack_num += 1;
             
         }
         else { // if the packet is from a new client, try to terminate the connection to the new client
@@ -172,7 +182,7 @@ void recv_video_iperf(cbuf_handle_t video_buffer){
     struct sockaddr_in recvAddr;
     char data[MAX_PACKET_SIZE];
     unsigned short dataLen = 0;
-    double fill_highest = 0;
+    int pack_num = 0;
 
     while(1){
         dataLen = recv_data(&recvAddr, data); // receive the next packet from the iperf client
@@ -183,15 +193,15 @@ void recv_video_iperf(cbuf_handle_t video_buffer){
         
         int bufferSpace = get_space(video_buffer); // get the remaining space in the video data buffer
 
-        // calculate how much of the video data buffer is used in percent
-        double used = (double) fill_level(video_buffer);
-        double percent = (used / VIDEO_BUFFER_SIZE) * 100;
-
-        if(percent - fill_highest > 1){
-            // if the percentage used is the highest it have been since the start of the program, print the percentage used and update the highest percentage
-            printf("highest buffer fill level: %d%%\n", (int) percent);
-            fill_highest = percent;
+        pack_num += 1;
+        if(pack_num >= BUFFER_PRINT_INTERVAL){
+            double used = (double) fill_level(video_buffer);
+            double percent = (used / VIDEO_BUFFER_SIZE) * 100;
+            int floorPercent = (int) percent;
+            printf("Current buffer fill is %d", floorPercent);
+            pack_num = 0;
         }
+
         if(bufferSpace >= dataLen){ // if we have enough room in the buffer, put the received data in the buffer
             send_packet_buffer(data, dataLen, video_buffer); // send the entire packet to the video data buffer
         }
