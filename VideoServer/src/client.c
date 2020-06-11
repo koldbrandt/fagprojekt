@@ -179,10 +179,10 @@ void run_test_client(char* serverIP, int serverPort){
 
                 while(temp != 0){
                     temp = read_data_fifo(&dataHolder);
+                    printf("read from fifo %c\n", dataHolder);
                 }
 
                 printf("fifo should be empty\n");
-
         }
     }
     close_client(listenThreadId);

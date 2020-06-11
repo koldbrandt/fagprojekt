@@ -209,7 +209,7 @@ void print_buffer_fill_level(cbuf_handle_t video_buffer){
     double used = (double) fill_level(video_buffer);
     double percent = (used / VIDEO_BUFFER_SIZE) * 100;
     int floorPercent = (int) percent;
-    printf("Current buffer fill is %d%%", floorPercent);
+    printf("Current buffer fill is %d%%\n", floorPercent);
 }
 
 void close_server(){
