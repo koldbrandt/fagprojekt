@@ -175,9 +175,10 @@ void run_test_client(char* serverIP, int serverPort){
                 break;
             case 6:;
                 char temp = -1;
+                char dataHolder = 0;
 
                 while(temp != 0){
-                    temp = read_data_fifo(&temp);
+                    temp = read_data_fifo(&dataHolder);
                 }
 
                 printf("fifo should be empty\n");

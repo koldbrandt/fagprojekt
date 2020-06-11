@@ -16,6 +16,7 @@ void wait_init(struct sockaddr_in* addr);
 void* fifo_write_thread(void* buffer);
 void send_packet_buffer(char* data, unsigned short dataLen, cbuf_handle_t video_buffer);
 void close_server();
+void print_buffer_fill_level(cbuf_handle_t video_buffer);
 
 void recv_video(cbuf_handle_t buf);
 void recv_video_tcp(cbuf_handle_t video_buffer);

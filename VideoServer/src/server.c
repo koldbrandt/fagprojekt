@@ -105,10 +105,7 @@ void recv_video(cbuf_handle_t video_buffer){
         }
 
         if(pack_num >= BUFFER_PRINT_INTERVAL){
-            double used = (double) fill_level(video_buffer);
-            double percent = (used / VIDEO_BUFFER_SIZE) * 100;
-            int floorPercent = (int) percent;
-            printf("Current buffer fill is %d", floorPercent);
+            print_buffer_fill_level(video_buffer);
             pack_num = 0;
         }
         
@@ -195,10 +192,7 @@ void recv_video_iperf(cbuf_handle_t video_buffer){
 
         pack_num += 1;
         if(pack_num >= BUFFER_PRINT_INTERVAL){
-            double used = (double) fill_level(video_buffer);
-            double percent = (used / VIDEO_BUFFER_SIZE) * 100;
-            int floorPercent = (int) percent;
-            printf("Current buffer fill is %d", floorPercent);
+            print_buffer_fill_level(video_buffer);
             pack_num = 0;
         }
 
@@ -209,6 +203,13 @@ void recv_video_iperf(cbuf_handle_t video_buffer){
             printf("buffer is full\n");
         }
     }
+}
+
+void print_buffer_fill_level(cbuf_handle_t video_buffer){
+    double used = (double) fill_level(video_buffer);
+    double percent = (used / VIDEO_BUFFER_SIZE) * 100;
+    int floorPercent = (int) percent;
+    printf("Current buffer fill is %d%%", floorPercent);
 }
 
 void close_server(){
