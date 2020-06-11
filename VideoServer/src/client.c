@@ -69,10 +69,13 @@ void video_send_loop(){
         char status = -1;
         while(status != 0){
             status = read_data_fifo(&pack_len[0]);
+            usleep(5);
         }
 
+        status = -1;
         while(status != 0){
             status = read_data_fifo(&pack_len[1]);
+            usleep(5);
         }
         
         unsigned short packet_len = 0;
@@ -174,10 +177,10 @@ void run_test_client(char* serverIP, int serverPort){
                 exit(0);
                 break;
             case 6:;
-                char temp = -1;
+                char temp = 0;
                 char dataHolder = 0;
 
-                while(temp != 0){
+                while(temp == 0){
                     temp = read_data_fifo(&dataHolder);
                     printf("read from fifo %c\n", dataHolder);
                 }
