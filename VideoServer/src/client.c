@@ -71,7 +71,7 @@ void video_send_loop(){
 
         unsigned short packet_len = 0;
         memcpy(&packet_len, &pack_len[0], 2);
-        printf("received len %d", packet_len);
+        printf("received len %d\n", packet_len);
         // read data from the fifo and put it into the buffer until the buffer contains the maximum allowed data in a VIDEO_DATA packet
         while (currentSize < packet_len){
             returnValue = read_data_fifo(&dataBuffer[currentSize]); // try to read one byte from the fifo

@@ -121,7 +121,7 @@ void send_packet_buffer(char* data, unsigned short dataLen, cbuf_handle_t video_
         char len_header[2];
         memcpy(&len_header, &dataLen, 2);
         send_data_buffer(len_header, 2, video_buffer);
-        printf("sent length %d", dataLen);
+        printf("sent length %d\n", dataLen);
         send_data_buffer(data, dataLen, video_buffer);
     }
     else{
