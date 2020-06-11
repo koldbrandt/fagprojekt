@@ -66,14 +66,19 @@ void video_send_loop(){
         int currentSize = 0;
         char dataBuffer[MAX_PACKET_SIZE];
         char pack_len[2];
-        read_data_fifo(&pack_len[0]);
-        read_data_fifo(&pack_len[1]);
+        char status = -1;
+        while(status != 0){
+            status = read_data_fifo(&pack_len[0]);
+        }
 
+        while(status != 0){
+            status = read_data_fifo(&pack_len[1]);
+        }
+        
         unsigned short packet_len = 0;
         memcpy(&packet_len, &pack_len[0], 2);
-        printf("received len %d\n", packet_len);
         if(packet_len > MAX_PACKET_SIZE){
-            printf("invalid packet len %d", packet_len);
+            printf("invalid packet len %d\n", packet_len);
             continue;
         }
         // read data from the fifo and put it into the buffer until the buffer contains the maximum allowed data in a VIDEO_DATA packet
@@ -171,7 +176,7 @@ void run_test_client(char* serverIP, int serverPort){
             case 6:;
                 char temp = -1;
 
-                while(temp == 0){
+                while(temp != 0){
                     temp = read_data_fifo(&temp);
                 }
 
