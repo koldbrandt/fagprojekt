@@ -1,6 +1,8 @@
 #ifndef FIFO_H
 #define FIFO_H
 
+#define FIFO_WAIT_TIME 250
+
 void mmap_fpga_peripherals();
 void munmap_fpga_peripherals();
 void open_physical_memory_device();

@@ -164,13 +164,14 @@ void run_test_client(char* serverIP, int serverPort){
             case 6:;
                 char temp = 0;
                 char dataHolder = 0;
+                int counter = 0;
                 temp = read_data_fifo(&dataHolder);
                 while(temp == 0){
                     temp = read_data_fifo(&dataHolder);
-                    printf("read from fifo %c\n", dataHolder);
+                    counter += 1;
                 }
-
-                printf("fifo should be empty\n");
+                printf("read %d bytes from fifo\n", counter);
+                break;
         }
     }
     close_client(listenThreadId);
@@ -184,7 +185,7 @@ void read_fifo_blocking(char* data){
     int status = -1;
     status = read_data_fifo(data);
     while(status != 0){
-        usleep(1);
+        usleep(FIFO_WAIT_TIME);
         status = read_data_fifo(data);
     }
 }

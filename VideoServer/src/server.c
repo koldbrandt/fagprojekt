@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
+#include <sys/time.h>
 
 #include "buffer.h"
 #include "server.h"
@@ -125,8 +127,7 @@ void recv_video(cbuf_handle_t video_buffer){
 }
 
 void send_packet_buffer(char* data, unsigned short dataLen, cbuf_handle_t video_buffer){
-    int bufferSpace = get_space(video_buffer); // get the remaining space left in the video data buffer
-    if(bufferSpace >= dataLen){ // if we have enough room in the buffer, put the received data in the buffer
+    if (video_buffer_has_space(dataLen)){ // if we have enough room in the buffer, put the received data in the buffer
         char len_header[2];
         memcpy(&len_header[0], &dataLen, 2);
         send_data_buffer(&len_header[0], 2, video_buffer);
@@ -134,6 +135,20 @@ void send_packet_buffer(char* data, unsigned short dataLen, cbuf_handle_t video_
     }
     else{
         send_packet_type(&clientAddr, SEND_SLOW); // otherwise skip the data and send a SEND_SLOW packet to the client
+    }
+}
+
+//cache space remaining in buffer so we don't need to check as often
+int spaceLastCheck = 0;
+
+int video_buffer_has_space(unsigned short amount){
+    if(amount < spaceLastCheck){
+        spaceLastCheck -= amount;
+        return 1;
+    }
+    else{
+        spaceLastCheck = get_space(video_buffer);
+        return amount < spaceLastCheck;
     }
 }
 
@@ -154,12 +169,12 @@ void* fifo_write_thread(void* buffer){
             sendStatus = send_data_fifo(readData); 
             // keep trying to write the data to the fifo until it succeeds
             while(sendStatus == 1){
-                usleep(1); //wait for fifo to not be full
+                usleep(FIFO_WAIT_TIME); //wait for fifo to not be full
                 sendStatus = send_data_fifo(readData);
             }
         }
         else{
-            usleep(1); //wait for video buffer to fill up
+            usleep(10000); //wait for video buffer to fill up
         } 
     }
 }
@@ -177,7 +192,7 @@ void print_buffer_fill_level(cbuf_handle_t video_buffer){
     double used = (double) fill_level(video_buffer);
     double percent = (used / VIDEO_BUFFER_SIZE) * 100;
     int floorPercent = (int) percent;
-    printf("Current buffer fill is %d%%\n", floorPercent);
+    printf("Buffer is at %d%%\n", floorPercent);
 }
 
 void close_server(){
