@@ -39,7 +39,6 @@ void run_server(int serverPort, int options){
 
     printf("Starting in server mode on port %d\n", serverPort);
 
-    printf("Server is using udp\n");
     init_server_socket_udp(serverPort);
     
     if(is_option_set(options, SERVER_RUN_IPERF)){
