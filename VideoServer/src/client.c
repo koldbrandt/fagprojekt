@@ -49,7 +49,6 @@ void run_client(char* serverIP, int serverPort, int options){
 
 void video_send_loop(){
     printf("starting video loop\n");
-    //pthread_create(&listenThreadId, NULL, &client_listen_thread, NULL); // create the thread that listens for SEND_FAST/SLOW packets from the server
     unsigned short packet_len = 0;
     int currentSize = 0;
     char dataBuffer[MAX_PACKET_SIZE];
@@ -180,30 +179,9 @@ void read_fifo_blocking(char* data){
         status = read_data_fifo(data);
     }
 }
-/*
-// this function runs in the second thread on the client, and adjusts the time to sleep between packets to adjust the send rate to the server
-void* client_listen_thread(){
-    printf("started flow control thread\n");
-    char buffer[MAX_PACKET_SIZE];
-    struct sockaddr_in datasrc;
-    while(1){
-        recv_data(&datasrc, buffer); // wait for either a SEND_SLOW or SEND_FAST packet
-        // adjust the sleep time accordingly
-        if(buffer[0] == SEND_SLOW){
-            sleepTime += SLEEP_TIME_INCREMENT;
-        }
-        else if(buffer[0] == SEND_FAST){
-            sleepTime -= SLEEP_TIME_INCREMENT;
-        }
-        if(sleepTime < 0){
-            sleepTime = 1;
-        }
-    }
-}*/
 
 void close_client(pthread_t listenThreadID){
     close_connection();
-    //pthread_join(listenThreadID, NULL);
     munmap_fpga_peripherals();
     close_physical_memory_device();
 }
