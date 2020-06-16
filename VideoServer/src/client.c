@@ -30,6 +30,8 @@ void run_client(char* serverIP, int serverPort, int options){
 
     char response[MAX_PACKET_SIZE];
     struct sockaddr_in srcAddr;
+
+    empty_fifo();
     
     do {
         send_packet_type(&serverAddr, INIT); // send the INIT packet to the server
@@ -42,7 +44,6 @@ void run_client(char* serverIP, int serverPort, int options){
     }
     while(!addrMatch(&srcAddr, &serverAddr) || response[0] != INIT_ACK);
     
-    empty_fifo();
     video_send_loop();
 
     close_client(listenThreadId);
