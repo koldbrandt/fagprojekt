@@ -20,17 +20,8 @@ void run_client(char* serverIP, int serverPort, int options){
     printf("Starting in client mode\n");
     printf("Connecting to %s on port %d\n", serverIP, serverPort);
 
-    // initialize socket
-    if(is_option_set(options, CLIENT_TCP)){
-        printf("Client is using tcp\n");
-        init_client_socket_tcp(&serverAddr, serverIP, serverPort);
-        run_client_tcp(serverIP, serverPort, options);
-    }
-    else{
-        printf("Client is using udp\n");
-        init_client_socket_udp(&serverAddr, serverIP, serverPort);
-    }
-
+    init_client_socket_udp(&serverAddr, serverIP, serverPort);
+    
     if(is_option_set(options, RUN_DEBUG)){
         // if we are running in debug mode, simply run the test client and return
         run_test_client(serverIP, serverPort);

@@ -39,17 +39,8 @@ void run_server(int serverPort, int options){
 
     printf("Starting in server mode on port %d\n", serverPort);
 
-    if(is_option_set(options, SERVER_TCP)){
-        printf("Server is using tcp\n");
-        init_server_socket_tcp(serverPort);
-        run_server_tcp(video_buffer, options);
-        close_server();
-        return;
-    }
-    else{
-        printf("Server is using udp\n");
-        init_server_socket_udp(serverPort);
-    }
+    printf("Server is using udp\n");
+    init_server_socket_udp(serverPort);
     
     if(is_option_set(options, SERVER_RUN_IPERF)){
         // run the server that expects an iperf client, and exit afterwards

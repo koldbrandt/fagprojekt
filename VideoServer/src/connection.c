@@ -10,8 +10,6 @@
 struct sockaddr_in ownAddr;
 int sockfd;
 
-int protocol;
-
 int init_server_socket_udp(int port) {
     if((sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
     	printf("sock\n");
@@ -35,49 +33,6 @@ int init_server_socket_udp(int port) {
     return 0;
 }
 
-int init_server_socket_tcp(int port) {
-    if((sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1){
-    	printf("sock\n");
-        exit(1);
-    }
-
-    // clear the data in the sockaddr_in struct
-    memset((char *) &ownAddr, 0, sizeof(ownAddr));
-
-    // set the server to use IPv4 and listen to any incoming connections on the specified port
-    ownAddr.sin_family = AF_INET;
-    ownAddr.sin_addr.s_addr = INADDR_ANY;
-    ownAddr.sin_port = htons(port);
-
-    if(bind(sockfd, (struct sockaddr*) &ownAddr, sizeof(ownAddr)) < 0)
-    {
-    	printf("bind failed\n");
-        exit(1);
-    }
-
-    if ((listen(sockfd, 5)) != 0) { 
-        printf("Listen failed...\n"); 
-        exit(0); 
-    } 
-    else{
-        printf("Server listening..\n"); 
-    }
-        
-    struct sockaddr_in clientAddr;
-    unsigned int len = sizeof(clientAddr); 
-  
-    int connfd = accept(sockfd, (struct sockaddr*) &clientAddr, &len); 
-    if (connfd < 0) { 
-        printf("server acccept failed...\n"); 
-        exit(0); 
-    } 
-    else{
-        printf("server acccept the client...\n"); 
-        sockfd = connfd;
-    }
-    return 0;
-}
-
 int init_client_socket_udp(struct sockaddr_in* serverAddr, char* serverIP, int port){
     if((sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
     	printf("sock\n");
@@ -94,30 +49,6 @@ int init_client_socket_udp(struct sockaddr_in* serverAddr, char* serverIP, int p
     return 0;
 }
 
-int init_client_socket_tcp(struct sockaddr_in* serverAddr, char* serverIP, int port){
-    if((sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1){
-    	printf("sock\n");
-        exit(1);
-    }
-
-    // clear the data in the sockaddr_in struct
-    memset(serverAddr, 0, sizeof(*serverAddr)); 
-
-    // set the client to use IPv4 and set the server ip and port
-    serverAddr->sin_family = AF_INET; 
-    serverAddr->sin_addr.s_addr = inet_addr(serverIP); 
-    serverAddr->sin_port = htons(port);
-
-    if (connect(sockfd, (struct sockaddr*) serverAddr, sizeof(*serverAddr)) != 0) { 
-        printf("connection with the server failed...\n"); 
-        exit(1); 
-    } 
-    else
-        printf("connected to the server..\n"); 
-
-    return 0;
-}
-
 // received data from the socket initialized from either init_client_socket or init_server_socket
 int recv_data(struct sockaddr_in* src, char* data){
     socklen_t clientLen;
@@ -131,10 +62,6 @@ int recv_data(struct sockaddr_in* src, char* data){
     }
 
     return recv_len;
-}
-
-int recv_data_tcp(char* data, int len){
-    return read(sockfd, data, len);
 }
 
 // the recv_data function but with a timeout as to not block execution indefinitely
@@ -175,10 +102,6 @@ int send_data(struct sockaddr_in* dest, char* data, int len){
     return 0;
 }
 
-int send_data_tcp(char* data, int len){
-    return write(sockfd, data, len);
-}
-
 // check if 2 addresses are the same
 int addrMatch(struct sockaddr_in* addr1, struct sockaddr_in* addr2){
     return (addr1->sin_addr.s_addr == addr2->sin_addr.s_addr) && (addr1->sin_port == addr2->sin_port);
@@ -193,11 +116,6 @@ void close_connection(){
 void send_packet_type(struct sockaddr_in* dest, char type){
     char response = type;
     send_data(dest, &response, 1);
-}
-
-void send_packet_type_tcp(char type){
-    char response = type;
-    send_data_tcp(&response, 1);
 }
 
 // print an array

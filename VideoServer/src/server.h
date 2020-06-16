@@ -8,8 +8,7 @@
 
 enum server_options{
     NO_FIFO = 1,
-    SERVER_RUN_IPERF = 2,
-    SERVER_TCP = 4
+    SERVER_RUN_IPERF = 2
 };
 
 void wait_init(struct sockaddr_in* addr);
@@ -20,14 +19,7 @@ void print_buffer_fill_level(cbuf_handle_t video_buffer);
 int video_buffer_has_space(unsigned short amount);
 
 void recv_video(cbuf_handle_t buf);
-void recv_video_tcp(cbuf_handle_t video_buffer);
-
 void run_server(int serverPort, int options);
-void run_server_tcp(cbuf_handle_t video_buffer, int options);
-
 void run_server_iperf(cbuf_handle_t video_buffer, int options);
-void run_server_iperf_tcp(cbuf_handle_t video_buffer, int options);
-
-void recv_video_iperf_tcp(cbuf_handle_t video_buffer);
 
 #endif // SERVER_H
