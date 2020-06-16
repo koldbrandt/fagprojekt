@@ -16,6 +16,7 @@ void close_client(pthread_t listenThreadID);
 void read_fifo_blocking(char* data);
 
 void send_video_packet(char* data, short len);
+void empty_fifo();
 
 void run_client(char* serverIP, int serverPort, int options);
 

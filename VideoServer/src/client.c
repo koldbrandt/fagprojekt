@@ -151,20 +151,25 @@ void run_test_client(char* serverIP, int serverPort){
                 close_connection();
                 exit(0);
                 break;
-            case 6:;
-                char temp = 0;
-                char dataHolder = 0;
-                int counter = 0;
-                temp = read_data_fifo(&dataHolder);
-                while(temp == 0){
-                    temp = read_data_fifo(&dataHolder);
-                    counter += 1;
-                }
-                printf("read %d bytes from fifo\n", counter);
+            case 6:
+                empty_fifo(); 
                 break;
         }
     }
     close_client(listenThreadId);
+}
+
+void empty_fifo(){
+    char temp = 0;
+    char dataHolder = 0;
+    int counter = 0;
+    printf("emptying fifo\n");
+    temp = read_data_fifo(&dataHolder);
+    while(temp == 0){
+        temp = read_data_fifo(&dataHolder);
+        counter += 1;
+    }
+    printf("read %d bytes from fifo\n", counter);
 }
 
 void send_video_packet(char* data, short len){

@@ -118,7 +118,8 @@ void recv_video(cbuf_handle_t video_buffer){
 }
 
 void send_packet_buffer(char* data, unsigned short dataLen, cbuf_handle_t video_buffer){
-    if (video_buffer_has_space(dataLen)){ // if we have enough room in the buffer, put the received data in the buffer
+    int bufferSpace = get_space(video_buffer);
+    if (bufferSpace > dataLen){ // if we have enough room in the buffer, put the received data in the buffer
         char len_header[2];
         memcpy(&len_header[0], &dataLen, 2);
         send_data_buffer(&len_header[0], 2, video_buffer);
@@ -130,7 +131,8 @@ void send_packet_buffer(char* data, unsigned short dataLen, cbuf_handle_t video_
 }
 
 //cache space remaining in buffer so we don't need to check as often
-int spaceLastCheck = 0;
+
+/*int spaceLastCheck = 0;
 
 int video_buffer_has_space(unsigned short amount){
     if(amount < spaceLastCheck){
@@ -141,7 +143,7 @@ int video_buffer_has_space(unsigned short amount){
         spaceLastCheck = get_space(video_buffer);
         return amount < spaceLastCheck;
     }
-}
+}*/
 
 // this is the function that runs in the second thread and reads the data from the video data buffer and writes it to the fifo
 // the buffer is passed as a void pointer as that seemed to be the only way to pass an argument to another thread
