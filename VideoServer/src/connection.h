@@ -10,12 +10,12 @@
 #include <arpa/inet.h>
 
 enum packet_types{
-    INIT = 1,
-    INIT_ACK = 2,
-    TERMINATE = 3,
-    VIDEO_DATA = 4,
-    SEND_SLOW = 5,
-    SEND_FAST = 6
+    INIT = 49,
+    INIT_ACK = 50,
+    TERMINATE = 51,
+    VIDEO_DATA = 52,
+    SEND_SLOW = 53,
+    SEND_FAST = 54
 };
 
 int addrMatch(struct sockaddr_in* addr1, struct sockaddr_in* addr2);

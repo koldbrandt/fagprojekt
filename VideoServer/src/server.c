@@ -124,9 +124,6 @@ void send_packet_buffer(char* data, unsigned short dataLen, cbuf_handle_t video_
         send_data_buffer(&len_header[0], 2, video_buffer);
         send_data_buffer(data, dataLen, video_buffer);
     }
-    else{
-        send_packet_type(&clientAddr, SEND_SLOW); // otherwise skip the data and send a SEND_SLOW packet to the client
-    }
 }
 
 //cache space remaining in buffer so we don't need to check as often
@@ -184,6 +181,12 @@ void print_buffer_fill_level(cbuf_handle_t video_buffer){
     double used = (double) fill_level(video_buffer);
     double percent = (used / VIDEO_BUFFER_SIZE) * 100;
     int floorPercent = (int) percent;
+    if(floorPercent < 20){
+        send_packet_type(&clientAddr, SEND_FAST);
+    }
+    if(floorPercent > 80){
+        send_packet_type(&clientAddr, SEND_SLOW);
+    }
     printf("Buffer is at %d%%\n", floorPercent);
 }
 
