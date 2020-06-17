@@ -1,7 +1,7 @@
 #ifndef CONNECTION_H
 #define CONNECTION_H
 
-#define MAX_PACKET_SIZE 1500
+#define MAX_PACKET_SIZE 2000
 
 #define SERVER_PORT 1337
 #define SERVER_IP "127.0.0.1"
