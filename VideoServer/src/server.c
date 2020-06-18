@@ -146,7 +146,6 @@ int video_buffer_has_space(unsigned short amount){
 void* fifo_write_thread(void* buffer){
     char readData;
     cbuf_handle_t video_buffer = (cbuf_handle_t) buffer; // cast the void pointer to a pointer to the buffer
-    int sendStatus = 0;
 
     // fifo write loop
     while(1){
@@ -155,12 +154,7 @@ void* fifo_write_thread(void* buffer){
             read_data_buffer(&readData, video_buffer);
             // send status indicates whether the data was written to the fifo successfully
             // this can fail if the fifo is full 
-            sendStatus = send_data_fifo(readData); 
-            // keep trying to write the data to the fifo until it succeeds
-            while(sendStatus == 1){
-                usleep(FIFO_WAIT_TIME); //wait for fifo to not be full
-                sendStatus = send_data_fifo(readData);
-            }
+            write_fifo_blocking(readData);
         }
         else{
             usleep(10000); //wait for video buffer to fill up

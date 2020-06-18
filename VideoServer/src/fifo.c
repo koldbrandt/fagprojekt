@@ -96,10 +96,24 @@ int send_data_fifo(char data){
 	return 1;
 }
 
+void write_fifo_blocking(char data){
+    while(FIFO_FRAMING_TX_FULL){
+        usleep(FIFO_WAIT_TIME);
+    }
+    *fifo_framing_transmit_ptr = data;
+}
+
 int read_data_fifo(char* dataPtr){
 	if (!FIFO_FRAMING_RX_EMPTY){
         *dataPtr = *fifo_framing_receive_ptr;
         return 0;
     } 
 	return 1;
+}
+
+void read_fifo_blocking(char* dataPtr){
+    while(FIFO_FRAMING_RX_EMPTY){
+        usleep(FIFO_WAIT_TIME);
+    }
+    *dataPtr = *fifo_framing_receive_ptr;
 }

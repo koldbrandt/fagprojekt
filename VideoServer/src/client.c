@@ -178,15 +178,6 @@ void send_video_packet(char* data, short len){
     send_data(&serverAddr, data, len);
 }
 
-void read_fifo_blocking(char* data){
-    int status = -1;
-    status = read_data_fifo(data);
-    while(status != 0){
-        usleep(FIFO_WAIT_TIME);
-        status = read_data_fifo(data);
-    }
-}
-
 void close_client(pthread_t listenThreadID){
     close_connection();
     munmap_fpga_peripherals();
