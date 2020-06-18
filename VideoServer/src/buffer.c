@@ -1,4 +1,3 @@
-#include <pthread.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,22 +30,6 @@ void read_data_buffer(char* data, cbuf_handle_t buf){
     buf->tail = (buf->tail + 1) % buf->max;
     buf->full = 0;
 }
-
-/* old read_data_buffer where you can read multiple bytes at a time
-   this is not needed is our case at the moment
-void read_data_buffer(char* data, int amount, cbuf_handle_t buf){
-    if(buf->tail + amount > buf->max){
-        int split = buf->max - buf->tail;
-        read_data_buffer(data, split, buf);
-        read_data_buffer(data + split, amount - split, buf);
-    }
-    else{
-        memcpy(data, &(buf->buffer[buf->tail]), amount);
-        buf->tail = (buf->tail + amount) % buf->max;
-        buf->full = 0;
-    }
-}
-*/
 
 // get the remaining empty space left in the buffer
 int get_space(cbuf_handle_t buf){

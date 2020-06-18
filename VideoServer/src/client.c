@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 #include "client.h"
 #include "connection.h"
@@ -10,7 +11,6 @@
 #define INIT_WAIT_TIMEOUT 3000 // milliseconds
 
 struct sockaddr_in serverAddr;
-pthread_t listenThreadId;
 
 void run_client(char* serverIP, int serverPort, int options){
     // map memory so we can read/write from/to the fifo
@@ -46,7 +46,7 @@ void run_client(char* serverIP, int serverPort, int options){
     
     video_send_loop();
 
-    close_client(listenThreadId);
+    close_client();
 }
 
 void video_send_loop(){
@@ -153,12 +153,13 @@ void run_test_client(char* serverIP, int serverPort){
                 close_connection();
                 exit(0);
                 break;
+
             case 6:
                 empty_fifo(); 
                 break;
         }
     }
-    close_client(listenThreadId);
+    close_client();
 }
 
 void empty_fifo(){
@@ -178,7 +179,7 @@ void send_video_packet(char* data, short len){
     send_data(&serverAddr, data, len);
 }
 
-void close_client(pthread_t listenThreadID){
+void close_client(){
     close_connection();
     munmap_fpga_peripherals();
     close_physical_memory_device();

@@ -126,21 +126,6 @@ void send_packet_buffer(char* data, unsigned short dataLen, cbuf_handle_t video_
     }
 }
 
-//cache space remaining in buffer so we don't need to check as often
-
-/*int spaceLastCheck = 0;
-
-int video_buffer_has_space(unsigned short amount){
-    if(amount < spaceLastCheck){
-        spaceLastCheck -= amount;
-        return 1;
-    }
-    else{
-        spaceLastCheck = get_space(video_buffer);
-        return amount < spaceLastCheck;
-    }
-}*/
-
 // this is the function that runs in the second thread and reads the data from the video data buffer and writes it to the fifo
 // the buffer is passed as a void pointer as that seemed to be the only way to pass an argument to another thread
 void* fifo_write_thread(void* buffer){

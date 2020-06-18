@@ -71,8 +71,6 @@ void print_help(){
     printf("    -p <port>: Set destination port [default: %d]\n", SERVER_PORT);
     printf("    -ip <ip>:  Set destination ip   [default: %s]\n", SERVER_IP);
     printf("    -d:        Run in debug mode\n");
-    printf("    -iperf:    Ignore protocol and send data as fast as it is available in the FIFO.\n");
-    printf("               Used when connecting to iperf server\n");
     printf("\n");
 
     printf("Example server:\n");

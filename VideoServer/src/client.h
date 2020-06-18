@@ -1,7 +1,7 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include <pthread.h>
+
 
 #define DUMMY_DATA_LEN 11
 #define DEFAULT_SLEEP_TIME 1
@@ -12,7 +12,7 @@ enum client_options{
 };
 
 void init_client(char* serverIP, int serverPort);
-void close_client(pthread_t listenThreadID);
+void close_client();
 void read_fifo_blocking(char* data);
 
 void send_video_packet(char* data, short len);
