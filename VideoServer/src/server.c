@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
+#include <pthread.h>
 
 #include "buffer.h"
 #include "server.h"
@@ -118,7 +119,7 @@ void recv_video(cbuf_handle_t video_buffer){
 
 void send_packet_buffer(char* data, unsigned short dataLen, cbuf_handle_t video_buffer){
     int bufferSpace = get_space(video_buffer);
-    if (bufferSpace > dataLen){ // if we have enough room in the buffer, put the received data in the buffer
+    if (bufferSpace > dataLen + 2){ // if we have enough room in the buffer, put the received data in the buffer
         char len_header[2];
         memcpy(&len_header[0], &dataLen, 2);
         send_data_buffer(&len_header[0], 2, video_buffer);

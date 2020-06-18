@@ -11,7 +11,6 @@
 
 #include "hps_soc_system.h"
 #include "fifo.h"
-#include "buffer.h"
 #include "hps_linux.h"
 
 #define FIFO_FRAMING_TX_FULL		  ((*(fifo_framing_txstatus_ptr+1))& 1 ) 
