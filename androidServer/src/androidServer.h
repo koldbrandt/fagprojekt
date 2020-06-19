@@ -1,7 +1,7 @@
 #ifndef ANDROIDSERVER_H
 #define ANDROIDSERVER_H
 #define MAX 64 
-#define PORT 8080
+#define PORT 8181
 #define SA struct sockaddr
 
 void startServer();
