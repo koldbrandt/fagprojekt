@@ -24,10 +24,10 @@ enum connection_status{
 };
 
 void run_server(int serverPort, int options){
- 
+
     // create buffer for received video data
     video_buffer = init_buffer(VIDEO_BUFFER_SIZE);
-    
+
     //Open physical memory to allow for read/write to/from the fifo
 	open_physical_memory_device();
     mmap_fpga_peripherals();
@@ -41,7 +41,7 @@ void run_server(int serverPort, int options){
     printf("Starting in server mode on port %d\n", serverPort);
 
     init_server_socket_udp(serverPort);
-    
+
     if(is_option_set(options, SERVER_RUN_IPERF)){
         // run the server that expects an iperf client, and exit afterwards
         // this is the path for the -iperf option
@@ -49,16 +49,16 @@ void run_server(int serverPort, int options){
         run_server_iperf(video_buffer, options);
         return;
     }
-    
+
     connectionStatus = WAITING_INIT;
-	
+
     // simple state machine for whether we are waiting for a client connection or currently receiving data from a client
     while(1){
         switch(connectionStatus){
             case WAITING_INIT:
                 wait_init(&clientAddr);
                 break;
-            
+
             case RECV_VIDEO:
                 recv_video(video_buffer);
                 break;
@@ -109,7 +109,7 @@ void recv_video(cbuf_handle_t video_buffer){
             // we probably don't need this check when the program is running in the full system as there should only ever be one client sending any data to the server
             send_packet_buffer(&data[0], recvLen, video_buffer);
             pack_num += 1;
-            
+
         }
         else { // if the packet is from a new client, try to terminate the connection to the new client
             send_packet_type(&clientAddr, TERMINATE);
@@ -139,12 +139,12 @@ void* fifo_write_thread(void* buffer){
             // if the buffer is not empty, read one byte from it
             read_data_buffer(&readData, video_buffer);
             // send status indicates whether the data was written to the fifo successfully
-            // this can fail if the fifo is full 
+            // this can fail if the fifo is full
             write_fifo_blocking(readData);
         }
         else{
             usleep(10000); //wait for video buffer to fill up
-        } 
+        }
     }
 }
 
@@ -161,12 +161,16 @@ void print_buffer_fill_level(cbuf_handle_t video_buffer){
     double used = (double) fill_level(video_buffer);
     double percent = (used / VIDEO_BUFFER_SIZE) * 100;
     int floorPercent = (int) percent;
+    /*
     if(floorPercent < 20){
+        printf("Send fast packet sent\n");
         send_packet_type(&clientAddr, SEND_FAST);
     }
     if(floorPercent > 80){
+        printf("send slow packet sent\n");
         send_packet_type(&clientAddr, SEND_SLOW);
     }
+    */
     printf("Buffer is at %d%%\n", floorPercent);
 }
 
