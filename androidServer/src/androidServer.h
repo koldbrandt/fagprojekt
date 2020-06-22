@@ -1,7 +1,6 @@
 #ifndef ANDROIDSERVER_H
 #define ANDROIDSERVER_H
 #define MAX 64 
-#define PORT 8181
 #define SA struct sockaddr
 
 void startServer();
@@ -13,4 +12,7 @@ void serverRead(void *threadID);
 void serverSendFunc(int connfd);
 
 void serverSend(void *threadID);
+
+void runServer(int port);
+
 #endif

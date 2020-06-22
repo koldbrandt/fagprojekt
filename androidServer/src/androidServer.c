@@ -7,7 +7,7 @@
 #include <sys/types.h> 
 #include "androidServer.h"
 
-int sockfd, connfd, len, connfd2, connected;
+int sockfd, connfd, len, connfd2, connected, PORT;
 struct sockaddr_in servaddr, cli;
 
 
@@ -140,7 +140,8 @@ void serverSend(void *threadID){
 }
 
 // Driver function 
-int main() { 
+void runServer(int port) { 
+PORT = port;
 pthread_t threads[2];
 
 //Start server
@@ -159,4 +160,12 @@ if (t2){
 }
 pthread_exit(NULL);
 
-} 
+}
+
+int main(int argc, char *argv[]){
+      for(int i = 0; i < argc; i++){
+          if(strcmp(argv[i], "-p") == 0){
+              runServer(atoi(argv[i+1]));
+          } 
+      }
+}   
