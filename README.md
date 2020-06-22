@@ -1,24 +1,26 @@
+This is the repository for the Link management block for both the android c server and the video c server  
+The repository for the android app can be found at [https://github.com/koldbrandt/AppForFagprojekt](https://github.com/koldbrandt/AppForFagprojekt)
 
 # Video Server
 
-The video server can be compiled using the makefile that is provided in the /VideoServer folder.
-`video` is the name of the compiled video server program. This program can be found in the /VideoServer/build folder after running the makefile.
+The video server can be compiled using the makefile that is provided in the `/VideoServer` folder.
+`video` is the name of the compiled video server program. This program can be found in the `/VideoServer/build` folder after running the makefile.
 
 The video server/client has multiple options available as command line arguments. For a full list simply run `video` or `video -h`. The most important options are listed below
 
 - `-c` : run as client
 - `-s` : run as server
-- `-p` : choose which port to use. (server and client)
-- `-ip`: choose which ip to connect to. (client only)
+- `-p [port]` : choose which port to use. (server and client)
+- `-ip [ip address]`: choose which ip to connect to. (client only)
 
 When testing the system, the following commands can be used, assuming the setup is  
 Client 1 -> Server 1 -> FIFO -> Client 2 -> Server 2
 
 ### Iperf testing
-Client 1: iperf -c [server 1 ip] -u -l [max packet size] -b 1m  
-Server 1: video -s -p 5001 -iperf  
-Client 2: video -c -d -ip [server 2 ip] -p 5001  
-Server 2: iperf -s -u -t 10  
+Client 1: `iperf -c [server 1 ip] -u -l [max packet size] -b 1m`  
+Server 1: `video -s -p 5001 -iperf`  
+Client 2: `video -c -d -ip [server 2 ip] -p 5001`  
+Server 2: `iperf -s -u -t 10`  
 
 Here server 1 and client 2 should be run on a DE1-SoC board.  
 
@@ -35,3 +37,7 @@ client 2 - video -c -ip [server 2 ip] -p 5001
 Here it is assumed that client 1 and server 2 is provided by the video block.  
 
 # Android Server
+
+The android server can be compiled with the makefile provided in the `/androidServer` folder.  
+The compiled program will be put into the `/androidServer/build` folder and is named `androidServer`  
+The program can then be run using the command `androidServer -p [port]`

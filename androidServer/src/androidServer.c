@@ -6,6 +6,8 @@
 #include <sys/socket.h> 
 #include <sys/types.h> 
 #include "androidServer.h"
+#include <pthread.h>
+#include <unistd.h>
 
 int sockfd, connfd, len, connfd2, connected, PORT;
 struct sockaddr_in servaddr, cli;
