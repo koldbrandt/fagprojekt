@@ -99,12 +99,8 @@ void recv_video(cbuf_handle_t video_buffer){
         pack_num += 1;
 
         if(pack_num >= BUFFER_PRINT_INTERVAL){
-                print_buffer_fill_level(video_buffer);
-                pack_num = 0;
-        }
-
-        else { // if the packet is from a new client, try to terminate the connection to the new client
-            send_packet_type(&clientAddr, TERMINATE);
+            print_buffer_fill_level(video_buffer);
+            pack_num = 0;
         }
     }
 }
