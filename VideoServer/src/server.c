@@ -95,18 +95,14 @@ void recv_video(cbuf_handle_t video_buffer){
             continue;
         }
 
-        if(addrMatch(&recvAddr, &clientAddr)){ // make sure the packet is from the client we are currently connected to
-            // this check is only needed because we use UDP, as this allows for any client to send any kind of data at any time
-            // we probably don't need this check when the program is running in the full system as there should only ever be one client sending any data to the server
-            send_packet_buffer(&data[0], recvLen, video_buffer);
-            pack_num += 1;
+        send_packet_buffer(&data[0], recvLen, video_buffer);
+        pack_num += 1;
 
-            if(pack_num >= BUFFER_PRINT_INTERVAL){
+        if(pack_num >= BUFFER_PRINT_INTERVAL){
                 print_buffer_fill_level(video_buffer);
                 pack_num = 0;
-            }
-
         }
+
         else { // if the packet is from a new client, try to terminate the connection to the new client
             send_packet_type(&clientAddr, TERMINATE);
         }
@@ -150,10 +146,6 @@ void run_server_iperf(cbuf_handle_t video_buffer, int options){
     printf("Running in iperf test mode\n");
     connectionStatus = RECV_VIDEO;
 
-    char data[MAX_PACKET_SIZE];
-    int recvLen = recv_data(&clientAddr, data);
-    send_packet_buffer(data, recvLen, video_buffer);
-    
     recv_video(video_buffer);
     close_server();
 }
